@@ -1,0 +1,23 @@
+services:
+  fastapi_app:
+    build: 
+      dockerfile: ./Dockerfile-test
+    container_name: fastapi_app
+    env_file:
+      - .env
+    command: ["sh", "-c", "sleep 120"]
+    depends_on:
+      database:
+       condition: service_healthy
+
+  database:
+    image: postgres:16-alpine3.19
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d postgres'"]
+      interval: 4s
+      timeout: 5s
+      retries: 5
