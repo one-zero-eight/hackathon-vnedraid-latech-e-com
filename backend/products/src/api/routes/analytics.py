@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from src.repositories.item import ItemRepository
 from src.schemas.seller import SellerIdScheme
 
-
 router = APIRouter(tags=["Analytics"], route_class=DishkaRoute)
 
 

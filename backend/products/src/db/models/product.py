@@ -2,7 +2,7 @@ from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Numeric
+from sqlalchemy import Column, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.__mixin__ import IdMixin
@@ -24,25 +24,24 @@ class ProductStatus(StrEnum):
 class Product(Base, IdMixin):
     __tablename__ = "product"
 
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(String(50))
     price = Column(Numeric(10, 2), default=Decimal("0.00"))
     discount_price = Column(Numeric(10, 2), default=Decimal("0.00"))
-    img_url: Mapped[str] = mapped_column(nullable=False)
-    count: Mapped[int] = mapped_column(nullable=False)
-    description: Mapped[str] = mapped_column(nullable=False)
-    size_width: Mapped[int] = mapped_column(nullable=False)
-    size_height: Mapped[int] = mapped_column(nullable=False)
-    size_depth: Mapped[int] = mapped_column(nullable=False)
-    lamoda_sku: Mapped[str] = mapped_column(nullable=False)
+    img_url: Mapped[str] = mapped_column(String(100))
+    count: Mapped[int] = mapped_column(default=0)
+    description: Mapped[str] = mapped_column(String(100), nullable=True)
+    size_width: Mapped[int] = mapped_column(nullable=True)
+    size_height: Mapped[int] = mapped_column(nullable=True)
+    size_depth: Mapped[int] = mapped_column(nullable=True)
+    lamoda_sku: Mapped[str] = mapped_column(nullable=True)
     status: Mapped[ProductStatus] = mapped_column(
         default=ProductStatus.INACTIVE
     )
-
     brand_id: Mapped[int] = mapped_column(
-        ForeignKey("brand.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("brand.id", ondelete="CASCADE")
     )
     category_id: Mapped[int] = mapped_column(
-        ForeignKey("category.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("category.id", ondelete="CASCADE")
     )
 
     brand: Mapped["Brand"] = relationship(

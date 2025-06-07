@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 class ItemIn(Base, IdMixin):
     __tablename__ = "item_in"
 
-    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
-    count: Mapped[int] = mapped_column(nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"))
+    count: Mapped[int] = mapped_column(default=0)
     added: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.UTC), nullable=False
+        default=lambda: datetime.datetime.now(datetime.UTC)
     )
 
     product: Mapped["Product"] = relationship(
@@ -33,9 +33,9 @@ class ItemIn(Base, IdMixin):
 class ItemOut(Base, IdMixin):
     __tablename__ = "item_out"
 
-    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("product.id"))
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete="CASCADE"))
-    count: Mapped[int]
+    count: Mapped[int] = mapped_column(default=0)
 
     product: Mapped["Product"] = relationship(
         "Product",
