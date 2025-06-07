@@ -28,4 +28,5 @@ jobs:
             pnpm build && \
             pm2 delete frontend-app 2>/dev/null || true && \
             pm2 start pnpm --name frontend-app -- start
+            pm2 save
           "
