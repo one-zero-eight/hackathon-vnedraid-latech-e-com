@@ -11,7 +11,7 @@ import { AuthFormField, UserData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { validateField } from '@/lib/validate'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export default function AuthPage() {
@@ -111,6 +111,7 @@ export default function AuthPage() {
       <div key={id} className="space-y-2">
         <Label htmlFor={id}>{label}</Label>
         <Input
+          readOnly={id === 'bank_name'}
           id={id}
           name={id}
           type={numericFields.includes(id) ? 'text' : type}
@@ -137,6 +138,41 @@ export default function AuthPage() {
       ? 'Пожалуйста, заполните данные пользователя'
       : 'Пожалуйста, заполните финансовые данные'
 
+  useEffect(() => {
+    const fetchBankName = async () => {
+      const bik = formData.bank_code.trim()
+
+      if (bik.length !== 9) {
+        // Clear bank name if BIK is incomplete
+        setFormData((prev) => ({ ...prev, bank_name: '' }))
+        return
+      }
+
+      try {
+        const res = await fetch(`https://bik-info.ru/api.html?type=json&bik=${bik}`)
+        if (!res.ok) throw new Error('Ошибка при получении банка')
+
+        const data = await res.json()
+
+        if (data?.name) {
+          // Decode HTML entities like &quot;
+          const parser = new DOMParser()
+          const decoded =
+            parser.parseFromString(data.name, 'text/html').body.textContent || data.name
+
+          setFormData((prev) => ({ ...prev, bank_name: decoded }))
+        } else {
+          // No bank found — clear the name
+          setFormData((prev) => ({ ...prev, bank_name: '' }))
+        }
+      } catch (error) {
+        console.error(error)
+        setFormData((prev) => ({ ...prev, bank_name: '' }))
+      }
+    }
+
+    fetchBankName()
+  }, [formData.bank_code])
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50/50 p-4">
       <Card className="w-full max-w-2xl">

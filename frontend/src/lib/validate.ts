@@ -73,6 +73,19 @@ export function validatePassword(value: string): string | null {
   if (value.length < 10 || value.length > 50) {
     return 'Ошибка значения, длина пароля должна быть от 10 до 50 символов'
   }
+
+  if (!/[a-z]/.test(value)) {
+    return 'Пароль должен содержать хотя бы одну строчную букву'
+  }
+
+  if (!/[A-Z]/.test(value)) {
+    return 'Пароль должен содержать хотя бы одну заглавную букву'
+  }
+
+  if (!/[0-9]/.test(value)) {
+    return 'Пароль должен содержать хотя бы одну цифру'
+  }
+
   return null
 }
 export const validateField = (name: string, value: string): string | null => {
