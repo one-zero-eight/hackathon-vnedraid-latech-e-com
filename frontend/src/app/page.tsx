@@ -49,13 +49,7 @@ export default function Home() {
         <h1 className="text-2xl font-medium">Управление товарами</h1>
       </section>
 
-      <DataTable
-        data={sampleData}
-        brands={sampleBrands}
-        categories={sampleCategories}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <DataTable data={sampleData} onEdit={handleEdit} onDelete={handleDelete} />
     </main>
   )
 }
