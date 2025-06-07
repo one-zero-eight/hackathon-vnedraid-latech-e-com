@@ -17,6 +17,7 @@ const sampleCategories: CategoryRead[] = [
 
 const sampleData = [
   {
+    id: '1',
     img_url: 'https://via.placeholder.com/150',
     name: 'Футболка',
     price: 1999,

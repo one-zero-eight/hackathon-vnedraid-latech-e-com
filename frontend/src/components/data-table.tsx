@@ -19,24 +19,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Settings } from 'lucide-react'
-import { BrandRead, CategoryRead, ProductStatus } from '@/lib/types'
+import { BrandRead, CategoryRead, ProductStatus, Product } from '@/lib/types'
 import { NumberFilter, TextFilter, StatusFilter } from './filters'
 
-interface Product {
-  img_url: string
-  name: string
-  price: number
-  discount_price: number
-  count: number
-  description: string
-  size_width: number
-  size_height: number
-  size_depth: number
-  lamoda_sku: string
-  status: ProductStatus
-  brand: BrandRead
-  category: CategoryRead
-}
+// interface Product {
+//   img_url: string
+//   name: string
+//   price: number
+//   discount_price: number
+//   count: number
+//   description: string
+//   size_width: number
+//   size_height: number
+//   size_depth: number
+//   lamoda_sku: string
+//   status: ProductStatus
+//   brand: BrandRead
+//   category: CategoryRead
+// }
 
 interface DataTableProps {
   data: Product[]
@@ -47,6 +47,7 @@ interface DataTableProps {
 }
 
 const columnLabels: Record<keyof Product, string> = {
+  id: 'ID',
   img_url: 'Изображение',
   name: 'Наименование',
   price: 'Цена',
