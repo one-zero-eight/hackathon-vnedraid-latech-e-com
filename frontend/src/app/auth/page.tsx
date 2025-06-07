@@ -11,6 +11,7 @@ import { useState } from 'react'
 
 export default function AuthPage() {
   const [step, setStep] = useState(1)
+  const [isLogin, setIsLogin] = useState(true)
   const [formData, setFormData] = useState<UserData>({
     username: '',
     email: '',
@@ -30,13 +31,18 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (step === 1) {
+    if (!isLogin && step === 1) {
       setStep(2)
     } else {
       // TODO: Submit formData to backend
       console.log('Final form data:', formData)
     }
   }
+
+  const loginFields: AuthFormField[] = [
+    { id: 'email', label: 'Почта', placeholder: 'Введите email', type: 'email' },
+    { id: 'password', label: 'Пароль', placeholder: 'Введите пароль', type: 'password' }
+  ]
 
   const renderFields = (fields: AuthFormField[]) =>
     fields.map(({ id, label, placeholder, type = 'text' }) => (
@@ -59,30 +65,50 @@ export default function AuthPage() {
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl">
-            {step === 1 ? 'Регистрация' : 'Финансовые данные'}
+            {isLogin ? 'Вход' : step === 1 ? 'Регистрация' : 'Финансовые данные'}
           </CardTitle>
           <CardDescription className="text-center">
-            {step === 1
-              ? 'Пожалуйста, заполните данные пользователя'
-              : 'Пожалуйста, заполните финансовые данные'}
+            {isLogin
+              ? 'Войдите в свой аккаунт'
+              : step === 1
+                ? 'Пожалуйста, заполните данные пользователя'
+                : 'Пожалуйста, заполните финансовые данные'}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
-              {step === 1 ? renderFields(formFields.user) : renderFields(formFields.financial)}
+              {isLogin
+                ? renderFields(loginFields)
+                : step === 1
+                  ? renderFields(formFields.user)
+                  : renderFields(formFields.financial)}
             </div>
 
             <div className="flex items-center justify-between">
-              {step === 2 && (
+              {!isLogin && step === 2 && (
                 <Button type="button" variant="outline" onClick={() => setStep(1)}>
                   Назад
                 </Button>
               )}
               <Button type="submit" className={cn(step === 1 ? 'w-full' : '', 'cursor-pointer')}>
-                {step === 1 ? 'Продолжить' : 'Зарегистрироваться'}
+                {isLogin ? 'Войти' : step === 1 ? 'Продолжить' : 'Зарегистрироваться'}
               </Button>
+            </div>
+
+            <div className="text-center text-sm">
+              {isLogin ? 'Нет аккаунта? ' : 'Уже есть аккаунт? '}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin)
+                  setStep(1)
+                }}
+                className="text-primary hover:text-primary/90 font-medium"
+              >
+                {isLogin ? 'Создать' : 'Войти'}
+              </button>
             </div>
           </form>
         </CardContent>
