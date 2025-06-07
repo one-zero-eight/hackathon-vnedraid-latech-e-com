@@ -7,5 +7,5 @@ class InvalidTokenException(AppException):
 
 
 class TokenExpiredException(AppException):
-    detail = "token in expired"
+    detail = "token is expired"
     status_code = 401
