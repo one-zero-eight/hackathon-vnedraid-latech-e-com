@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formFields } from '@/lib/constants'
+import { useLogin, useRegister } from '@/lib/hooks/useAuth'
 import { AuthFormField, UserData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
-
 export default function AuthPage() {
   const [step, setStep] = useState(1)
   const [isLogin, setIsLogin] = useState(true)
@@ -29,13 +29,43 @@ export default function AuthPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleNumericInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const charCode = e.charCode || e.key.charCodeAt(0)
+    if (charCode !== 8 && charCode !== 9 && charCode !== 13 && (charCode < 48 || charCode > 57)) {
+      e.preventDefault()
+    }
+  }
+  const { mutate, isError, error, isSuccess, data } = useLogin()
+  const { mutate: registerMutate } = useRegister()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLogin && step === 1) {
       setStep(2)
+      return
+    }
+    if (isLogin) {
+      const loginData = {
+        login: formData.email,
+        password: formData.password
+      }
+      mutate(loginData, {
+        onSuccess: (data) => {
+          console.log(data)
+        },
+        onError: (error) => {
+          console.log(error)
+        }
+      })
     } else {
-      // TODO: Submit formData to backend
-      console.log('Final form data:', formData)
+      registerMutate(formData, {
+        onSuccess: (data) => {
+          console.log(data)
+        },
+        onError: (error) => {
+          console.log(error)
+        }
+      })
     }
   }
 
@@ -44,6 +74,8 @@ export default function AuthPage() {
     { id: 'password', label: 'Пароль', placeholder: 'Введите пароль', type: 'password' }
   ]
 
+  const numericFields = ['inn', 'card_number', 'bank_code']
+
   const renderFields = (fields: AuthFormField[]) =>
     fields.map(({ id, label, placeholder, type = 'text' }) => (
       <div key={id} className="space-y-2">
@@ -51,11 +83,13 @@ export default function AuthPage() {
         <Input
           id={id}
           name={id}
-          type={type}
-          value={(formData as any)[id]}
+          type={numericFields.includes(id) ? 'text' : type}
+          value={formData[id as keyof UserData]}
           onChange={handleChange}
           placeholder={placeholder}
           required
+          pattern={numericFields.includes(id) ? '[0-9]*' : undefined}
+          onKeyDown={numericFields.includes(id) ? handleNumericInput : undefined}
         />
       </div>
     ))
@@ -107,7 +141,9 @@ export default function AuthPage() {
                 }}
                 className="text-primary hover:text-primary/90 font-medium"
               >
-                {isLogin ? 'Создать' : 'Войти'}
+                <span className="cursor-pointer text-blue-400">
+                  {isLogin ? 'Создать' : 'Войти'}
+                </span>
               </button>
             </div>
           </form>

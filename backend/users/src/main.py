@@ -11,6 +11,8 @@ from src.domain.exceptions.base import AppException
 from src.presentation.dependencies import create_async_container
 from src.presentation.routes.users import user_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 def get_openapi_schema(app: FastAPI) -> Dict[str, Any]:
     if not app.openapi_schema:
@@ -64,6 +66,7 @@ def create_app() -> FastAPI:
     """
     app = FastAPI(root_path="/api/v1")
     app.include_router(user_router)
+    
     app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
     setup_dishka(container, app)

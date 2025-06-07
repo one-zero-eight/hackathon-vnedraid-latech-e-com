@@ -5,19 +5,19 @@ import { NextResponse } from 'next/server'
 const publicPaths = ['/auth']
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value
-  const { pathname } = request.nextUrl
+  // const token = request.cookies.get('token')?.value
+  // const { pathname } = request.nextUrl
 
-  // Allow public paths
-  if (publicPaths.includes(pathname)) {
-    return NextResponse.next()
-  }
+  // // Allow public paths
+  // if (publicPaths.includes(pathname)) {
+  //   return NextResponse.next()
+  // }
 
-  // Check if user is authenticated
-  if (!token) {
-    const url = new URL('/auth', request.url)
-    return NextResponse.redirect(url)
-  }
+  // // Check if user is authenticated
+  // if (!token) {
+  //   const url = new URL('/auth', request.url)
+  //   return NextResponse.redirect(url)
+  // }
 
   return NextResponse.next()
 }
