@@ -1,7 +1,8 @@
+from decimal import Decimal
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.__mixin__ import IdMixin
@@ -24,8 +25,8 @@ class Product(Base, IdMixin):
     __tablename__ = "product"
 
     name: Mapped[str] = mapped_column(nullable=False)
-    price: Mapped[float] = mapped_column(nullable=False)
-    discount_price: Mapped[float] = mapped_column(nullable=False)
+    price = Column(Numeric(10, 2), default=Decimal("0.00"))
+    discount_price = Column(Numeric(10, 2), default=Decimal("0.00"))
     img_url: Mapped[str] = mapped_column(nullable=False)
     count: Mapped[int] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
@@ -33,7 +34,9 @@ class Product(Base, IdMixin):
     size_height: Mapped[int] = mapped_column(nullable=False)
     size_depth: Mapped[int] = mapped_column(nullable=False)
     lamoda_sku: Mapped[str] = mapped_column(nullable=False)
-    status: Mapped[ProductStatus] = mapped_column(default=ProductStatus.INACTIVE, nullable=False)
+    status: Mapped[ProductStatus] = mapped_column(
+        default=ProductStatus.INACTIVE
+    )
 
     brand_id: Mapped[int] = mapped_column(
         ForeignKey("brand.id", ondelete="CASCADE"), nullable=False

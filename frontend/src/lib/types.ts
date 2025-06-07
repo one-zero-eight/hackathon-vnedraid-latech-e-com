@@ -37,7 +37,7 @@ export interface CategoryRead {
 }
 
 export interface Product {
-  id: number
+  id: string
   name: string
   price: number
   discount_price: number

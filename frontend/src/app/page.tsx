@@ -17,6 +17,7 @@ const sampleCategories: CategoryRead[] = [
 
 const sampleData = [
   {
+    id: '1',
     img_url: 'https://via.placeholder.com/150',
     name: 'Футболка',
     price: 1999,
@@ -48,13 +49,7 @@ export default function Home() {
         <h1 className="text-2xl font-medium">Управление товарами</h1>
       </section>
 
-      <DataTable
-        data={sampleData}
-        brands={sampleBrands}
-        categories={sampleCategories}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <DataTable data={sampleData} onEdit={handleEdit} onDelete={handleDelete} />
     </main>
   )
 }
