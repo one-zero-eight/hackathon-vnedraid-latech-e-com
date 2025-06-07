@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.__mixin__ import IdMixin
@@ -12,8 +13,8 @@ if TYPE_CHECKING:
 class Brand(Base, IdMixin):
     __tablename__ = "brand"
 
-    name: Mapped[str] = mapped_column(nullable=False, unique=True)
-    seller_id: Mapped[int] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(String(50), unique=True)
+    seller_id: Mapped[int]
 
     products: Mapped[list["Product"]] = relationship(
         "Product",

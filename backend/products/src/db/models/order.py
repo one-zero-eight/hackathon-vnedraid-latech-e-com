@@ -22,10 +22,10 @@ class Order(Base, IdMixin):
     __tablename__ = "order"
 
     status: Mapped[OrderStatus] = mapped_column(
-        nullable=False, default=OrderStatus.PENDING
+        default=OrderStatus.PENDING
     )
     sold_datetime: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.UTC), nullable=False
+        default=lambda: datetime.datetime.now(datetime.UTC)
     )
 
     order_items: Mapped[list["ItemOut"]] = relationship(

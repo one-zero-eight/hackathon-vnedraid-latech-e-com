@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Text
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.orm import Mapped, relationship
 
 from src.db.__mixin__ import IdMixin
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 class Comment(Base, IdMixin):
     __tablename__ = "comment"
 
-    content: Mapped[str] = Column(Text, nullable=False)
-    product_id: Mapped[int] = Column(ForeignKey("product.id"), nullable=False)
+    content: Mapped[str] = Column(String(50))
+    product_id: Mapped[int] = Column(ForeignKey("product.id"))
 
     product: Mapped["Product"] = relationship(
         "Product",
