@@ -1,6 +1,14 @@
 'use client'
 
-import React from 'react'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -9,17 +17,10 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
+import { BrandRead, CategoryRead, Product, ProductStatus } from '@/lib/types'
 import { MoreHorizontal, Settings } from 'lucide-react'
-import { BrandRead, CategoryRead, ProductStatus, Product } from '@/lib/types'
+import { useRouter } from 'next/navigation'
+import React from 'react'
 import { NumberFilter, StatusFilter } from './filters'
 
 interface DataTableProps {
@@ -174,16 +175,25 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
   }, [data, filters, globalSearch])
 
   const editableFields: (keyof Product)[] = ['name', 'price', 'discount_price']
-
+  const redirect = useRouter()
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <Input
           placeholder="Поиск по всем текстовым полям..."
           value={globalSearch}
           onChange={(e) => setGlobalSearch(e.target.value)}
           className="max-w-sm"
         />
+        <Button
+          className="cursor-pointer"
+          onClick={() => {
+            redirect.push('/create')
+          }}
+        >
+          {' '}
+          Создать товар
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>

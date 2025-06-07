@@ -32,11 +32,11 @@ jobs:
             export POSTGRES_USER='$POSTGRES_USER' && \
             export POSTGRES_PASSWORD='$POSTGRES_PASSWORD' && \
             export POSTGRES_DB='$POSTGRES_DB' && \
+            envsubst < products/.env.example > products/.env && \
             export JWT_SECRET_KEY='$JWT_SECRET_KEY' && \
             export ACCESS_TOKEN_EXPIRE_SECONDS='$ACCESS_TOKEN_EXPIRE_SECONDS' && \
             export REFRESH_TOKEN_EXPIRE_SECONDS='$REFRESH_TOKEN_EXPIRE_SECONDS' && \
             envsubst < users/.env.example > users/.env && \
-            envsubst < products/.env.example > products/.env && \
             docker compose -f products/docker-compose.yml up -d --build && \
             docker compose -f users/docker-compose.yml up -d --build
           "
