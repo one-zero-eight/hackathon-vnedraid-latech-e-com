@@ -14,7 +14,7 @@ class Category(Base, IdMixin):
 
     name: Mapped[str] = mapped_column(nullable=False)
 
-    products: Mapped[list[Product]] = relationship(
+    products: Mapped[list["Product"]] = relationship(
         'Product',
         back_populates='category',
         cascade='all, delete-orphan',
