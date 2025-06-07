@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 
+from src.api.routes.analytics import router as analytics_router
 from src.dependencies import create_async_container
 
 
@@ -44,6 +45,7 @@ async def validation_exception_handler(
 
 def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1")
+    app.include_router(analytics_router)
     app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
     setup_dishka(container, app)

@@ -1,24 +1,24 @@
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Wallet, ReceiptText } from 'lucide-react'
 import StatisticsCard from '@/components/ui/statisticsCard'
 
 const stats = [
   {
-    icon: ShoppingCart,
-    title: 'Продажи',
+    icon: Wallet,
+    title: 'Заказали на сумму',
     bottomLeftValue: 12500,
     trend: 'up' as const,
     trendValue: 12.5
   },
   {
-    icon: ShoppingCart,
-    title: 'Заказы',
+    icon: ReceiptText,
+    title: 'Средний чек',
     bottomLeftValue: 842,
     trend: 'down' as const,
     trendValue: 3.2
   },
   {
     icon: ShoppingCart,
-    title: 'Клиенты',
+    title: 'Количество заказанных товаров',
     bottomLeftValue: 3500,
     trend: 'up' as const,
     trendValue: 8.1

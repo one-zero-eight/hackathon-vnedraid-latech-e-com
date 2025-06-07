@@ -1,12 +1,8 @@
 from typing import AsyncIterable
 
 from dishka import Provider, Scope, provide
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
+                                    async_sessionmaker, create_async_engine)
 
 from src.config import settings
 
@@ -27,9 +23,7 @@ class DbProvider(Provider):
         await engine.dispose()
 
     @provide
-    def get_pool(
-        self, engine: AsyncEngine
-    ) -> async_sessionmaker[AsyncSession]:
+    def get_pool(self, engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
         return async_sessionmaker(
             autocommit=False,
             autoflush=False,

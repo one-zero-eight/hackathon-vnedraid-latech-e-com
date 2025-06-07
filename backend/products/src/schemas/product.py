@@ -20,10 +20,10 @@ class ProductRead(BaseModel):
     size_depth: int
     lamoda_sku: str
     status: ProductStatus
-
     brand: "BrandRead"
     category: "CategoryRead"
     comments: list["CommentRead"] = []
+
     items_in: list["ItemInRead"] = []
     items_out: list["ItemOutRead"] = []
 
