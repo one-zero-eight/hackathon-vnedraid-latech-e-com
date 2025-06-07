@@ -1,0 +1,57 @@
+[project]
+name = "fastapi-users-service"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.16.1",
+    "asyncpg>=0.30.0",
+    "dishka>=1.6.0",
+    "fastapi>=0.115.12",
+    "passlib[bcrypt]>=1.7.4",
+    "phonenumbers>=9.0.6",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.9.1",
+    "pydantic[email]>=2.11.5",
+    "pyjwt>=2.10.1",
+    "sqlalchemy>=2.0.41",
+    "uvicorn>=0.34.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+]
+test = [
+    "freezegun>=1.5.2",
+    "httpx>=0.28.1",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=1.0.0",
+]
+
+[tool.black]
+line-length=79
+extend-exclude='''
+(
+    \.git
+  | \.mypy_cache
+  | \.venv
+  | postgres_data/
+)
+'''
+
+[tool.isort]
+default_section = "THIRDPARTY" 
+known_local_folder = ["src", "db", "domain", "infrastructure", "presentation", "application", "tests"]
+sections = ["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"] 
+skip = [".gitignore", "venv", ".venv"] 
+multi_line_output = 3
+line_length = 79
+lines_after_imports = 2
+include_trailing_comma = true
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
