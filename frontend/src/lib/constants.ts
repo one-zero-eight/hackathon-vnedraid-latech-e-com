@@ -1,3 +1,5 @@
+import { AuthFormField } from './types'
+
 export const formFields = {
   user: [
     { id: 'username', label: 'Системный логин', placeholder: 'Введите логин' },
@@ -18,3 +20,9 @@ export const formFields = {
     { id: 'bank_name', label: 'Название банка', placeholder: 'Введите название банка' }
   ]
 }
+
+export const numericFields = ['inn', 'card_number', 'bank_code']
+export const loginFields: AuthFormField[] = [
+  { id: 'email', label: 'Почта', placeholder: 'Введите email', type: 'email' },
+  { id: 'password', label: 'Пароль', placeholder: 'Введите пароль', type: 'password' }
+]

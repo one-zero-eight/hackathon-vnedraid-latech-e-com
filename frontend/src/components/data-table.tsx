@@ -24,8 +24,6 @@ import { NumberFilter, StatusFilter } from './filters'
 
 interface DataTableProps {
   data: Product[]
-  brands: BrandRead[]
-  categories: CategoryRead[]
   onEdit: (id: string, field: keyof Product, value: any) => void
   onDelete: (id: string) => void
 }
@@ -63,7 +61,7 @@ type Filters = {
         : string
 }
 
-export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTableProps) {
+export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
   const [selectedRows, setSelectedRows] = React.useState<Set<string>>(new Set())
   const [editingCell, setEditingCell] = React.useState<{
     id: string
@@ -72,6 +70,10 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
   const [filters, setFilters] = React.useState<Filters>({})
   const [globalSearch, setGlobalSearch] = React.useState('')
   const [activeNumericFilter, setActiveNumericFilter] = React.useState<keyof Product | null>(null)
+  const [modifiedCells, setModifiedCells] = React.useState<
+    Map<string, { field: keyof Product; value: any; originalValue: any }>
+  >(new Map())
+  const [isEditing, setIsEditing] = React.useState(false)
 
   const handleRowSelect = (id: string) => {
     const newSelected = new Set(selectedRows)
@@ -85,10 +87,33 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
 
   const handleCellEdit = (id: string, field: keyof Product) => {
     setEditingCell({ id, field })
+    setIsEditing(true)
   }
 
   const handleCellSave = (id: string, field: keyof Product, value: any) => {
-    onEdit(id, field, value)
+    const originalValue = data.find((item) => item.lamoda_sku === id)?.[field]
+    if (value !== originalValue) {
+      setModifiedCells((prev) => {
+        const newMap = new Map(prev)
+        newMap.set(`${id}-${field}`, { field, value, originalValue })
+        return newMap
+      })
+    }
+    setEditingCell(null)
+  }
+
+  const handleSaveChanges = () => {
+    modifiedCells.forEach(({ field, value }, key) => {
+      const [id] = key.split('-')
+      onEdit(id, field, value)
+    })
+    setModifiedCells(new Map())
+    setIsEditing(false)
+  }
+
+  const handleCancelChanges = () => {
+    setModifiedCells(new Map())
+    setIsEditing(false)
     setEditingCell(null)
   }
 
@@ -98,7 +123,6 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
 
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
-      // First apply global text search
       if (globalSearch) {
         const searchLower = globalSearch.toLowerCase()
         const hasTextMatch = Object.entries(item).some(([key, value]) => {
@@ -114,7 +138,6 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
         if (!hasTextMatch) return false
       }
 
-      // Then apply other filters
       return Object.entries(filters).every(([key, value]) => {
         const field = key as keyof Product
         const itemValue = item[field]
@@ -228,19 +251,15 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
                   const field = key as keyof Product
                   const isEditing =
                     editingCell?.id === row.lamoda_sku && editingCell?.field === field
+                  const modifiedCell = modifiedCells.get(`${row.lamoda_sku}-${field}`)
+                  const displayValue = modifiedCell ? modifiedCell.value : value
 
                   return (
                     <TableCell key={key}>
                       {isEditing && editableFields.includes(field) ? (
                         <Input
-                          type={'number'}
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          defaultValue={value as number}
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement
-                            target.value = target.value.replace(/[^0-9]/g, '')
-                          }}
+                          type={field === 'name' ? 'string' : 'number'}
+                          defaultValue={displayValue as string | number}
                           onBlur={(e) => handleCellSave(row.lamoda_sku, field, e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -251,23 +270,23 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
                         />
                       ) : (
                         <div
-                          className={editableFields.includes(field) ? 'cursor-pointer' : ''}
+                          className={`${editableFields.includes(field) ? 'cursor-pointer' : ''} ${modifiedCell ? 'font-medium text-blue-600' : ''}`}
                           onClick={() =>
                             editableFields.includes(field) && handleCellEdit(row.lamoda_sku, field)
                           }
                         >
                           {field === 'img_url' ? (
                             <img
-                              src={value as string}
+                              src={displayValue as string}
                               alt={row.name}
                               className="h-10 w-10 object-cover"
                             />
                           ) : field === 'brand' ? (
-                            (value as BrandRead).name
+                            (displayValue as BrandRead).name
                           ) : field === 'category' ? (
-                            (value as CategoryRead).name
+                            (displayValue as CategoryRead).name
                           ) : (
-                            value
+                            displayValue
                           )}
                         </div>
                       )}
@@ -293,6 +312,19 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
           </TableBody>
         </Table>
       </div>
+      {isEditing && (
+        <div
+          className="sticky bottom-0 left-0 z-10 flex w-full flex-row items-center justify-center gap-2 border-t bg-white p-4"
+          style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.04)' }}
+        >
+          <Button variant="outline" onClick={handleCancelChanges} className="w-42">
+            Отмена
+          </Button>
+          <Button onClick={handleSaveChanges} className="w-42">
+            Сохранить
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
