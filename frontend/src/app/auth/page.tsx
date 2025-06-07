@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { validateField } from '@/lib/validate'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function AuthPage() {
   const [step, setStep] = useState(1)
@@ -90,13 +91,18 @@ export default function AuthPage() {
     }
 
     const onError = (error: any) => {
-      console.error(error)
+      toast.error(error.message)
     }
 
     if (isLogin) {
       loginMutate({ login: formData.email, password: formData.password }, { onSuccess, onError })
     } else {
-      registerMutate(formData, { onSuccess, onError })
+      registerMutate(formData, {
+        onSuccess(data) {
+          toast.success('Регистрация прошла успешно, ждите подтверждения')
+        },
+        onError
+      })
     }
   }
 
