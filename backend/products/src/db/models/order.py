@@ -28,31 +28,9 @@ class Order(Base, IdMixin):
         default=lambda: datetime.datetime.now(datetime.UTC), nullable=False
     )
 
-    order_items: Mapped[list["OrderItem"]] = relationship(
+    order_items: Mapped[list["ItemOut"]] = relationship(
         "OrderItem",
         back_populates="order",
         cascade="all, delete-orphan",
         lazy="joined",
-    )
-
-
-class OrderItem(Base, IdMixin):
-    __tablename__ = "order_item"
-
-    item_out_id: Mapped[int] = mapped_column(ForeignKey("item_out.id", ondelete="CASCADE"))
-    order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete="CASCADE"))
-
-    item_out: Mapped["ItemOut"] = relationship(
-        "ItemOut",
-        foreign_keys=[item_out_id],
-        lazy="joined",
-        uselist=False,
-    )
-
-    order: Mapped["Order"] = relationship(
-        "Order",
-        foreign_keys=[order_id],
-        back_populates="order_items",
-        lazy="joined",
-        uselist=False,
     )
