@@ -12,7 +12,6 @@ from src.db.models.item import ItemIn, ItemOut
 from src.db.models.order import Order
 from src.db.models.product import Product
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -20,9 +19,7 @@ config = context.config
 section = config.config_ini_section
 config.set_section_option(section, "POSTGRES_DB", settings.POSTGRES_DB)
 config.set_section_option(section, "POSTGRES_USER", settings.POSTGRES_USER)
-config.set_section_option(
-    section, "POSTGRES_PASSWORD", settings.POSTGRES_PASSWORD
-)
+config.set_section_option(section, "POSTGRES_PASSWORD", settings.POSTGRES_PASSWORD)
 config.set_section_option(section, "POSTGRES_HOST", settings.POSTGRES_HOST)
 config.set_section_option(section, "POSTGRES_PORT", settings.POSTGRES_PORT)
 
@@ -82,9 +79,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

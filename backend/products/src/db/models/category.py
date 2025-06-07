@@ -10,13 +10,13 @@ if TYPE_CHECKING:
 
 
 class Category(Base, IdMixin):
-    __tablename__ = 'category'
+    __tablename__ = "category"
 
     name: Mapped[str] = mapped_column(nullable=False)
 
     products: Mapped[list["Product"]] = relationship(
-        'Product',
-        back_populates='category',
-        cascade='all, delete-orphan',
-        lazy="joined"
+        "Product",
+        back_populates="category",
+        cascade="all, delete-orphan",
+        lazy="joined",
     )

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Brand(Base, IdMixin):
-    __tablename__ = 'brand'
+    __tablename__ = "brand"
 
     name: Mapped[str] = mapped_column(nullable=False)
     seller_id: Mapped[int] = mapped_column(nullable=False)

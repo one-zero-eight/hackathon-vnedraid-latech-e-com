@@ -29,7 +29,7 @@ class Order(Base, IdMixin):
     )
 
     order_items: Mapped[list["ItemOut"]] = relationship(
-        "OrderItem",
+        "ItemOut",
         back_populates="order",
         cascade="all, delete-orphan",
         lazy="joined",

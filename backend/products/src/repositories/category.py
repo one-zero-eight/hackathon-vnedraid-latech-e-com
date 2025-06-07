@@ -5,5 +5,4 @@ class CategoryRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self):
-        ...
+    async def get_by_id(self): ...
