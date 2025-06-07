@@ -5,7 +5,7 @@ import {
   CardTitle,
   CardAction,
   CardContent,
-  CardFooter,
+  CardFooter
 } from '@/components/ui/card'
 import { ArrowUpRight, ArrowDownRight, LucideIcon } from 'lucide-react'
 
@@ -24,18 +24,18 @@ export default function StatisticsCard({
   title,
   bottomLeftValue,
   trend,
-  trendValue,
+  trendValue
 }: StatisticsCardProps) {
   return (
-    <Card className="w-full h-40 flex flex-col">
+    <Card className="flex h-40 w-full flex-col">
       <CardHeader className="flex items-center gap-3 px-6">
-        <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg text-gray-600 flex-shrink-0">
-          <Icon className="w-6 h-6" />
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+          <Icon className="h-6 w-6" />
         </div>
         <CardTitle className="truncate">{title}</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex justify-between items-start px-6 mt-auto">
+      <CardContent className="mt-auto flex items-start justify-between px-6">
         <div className="text-2xl font-bold">{bottomLeftValue}</div>
         <div
           className={`flex items-start text-base font-bold ${
@@ -43,9 +43,9 @@ export default function StatisticsCard({
           }`}
         >
           {trend === 'up' ? (
-            <ArrowUpRight className="w-5 h-5 mr-1 mt-[3px]" />
+            <ArrowUpRight className="mt-[3px] mr-1 h-5 w-5" />
           ) : (
-            <ArrowDownRight className="w-5 h-5 mr-1 mt-[3px]" />
+            <ArrowDownRight className="mt-[3px] mr-1 h-5 w-5" />
           )}
           {trendValue}%
         </div>
@@ -53,4 +53,3 @@ export default function StatisticsCard({
     </Card>
   )
 }
-
