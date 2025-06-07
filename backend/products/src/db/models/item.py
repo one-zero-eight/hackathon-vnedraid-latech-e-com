@@ -18,7 +18,7 @@ class ItemIn(Base, IdMixin):
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
     count: Mapped[int] = mapped_column(nullable=False)
     added: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.timezone.utc), nullable=False
+        default=lambda: datetime.datetime.now(datetime.UTC), nullable=False
     )
 
     product: Mapped["Product"] = relationship(
@@ -43,9 +43,9 @@ class ItemOut(Base, IdMixin):
         uselist=False,
     )
 
-    order_items: Mapped[list["OrderItem"]] = relationship(
+    order_items: Mapped["OrderItem"] = relationship(
         "OrderItem",
         back_populates="item_out",
-        cascade="all, delete-orphan",
         lazy="joined",
+        uselist=False,
     )

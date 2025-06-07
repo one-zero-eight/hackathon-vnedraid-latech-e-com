@@ -24,6 +24,9 @@ class Order(Base, IdMixin):
     status: Mapped[OrderStatus] = mapped_column(
         nullable=False, default=OrderStatus.PENDING
     )
+    sold_datetime: Mapped[datetime.datetime] = mapped_column(
+        default=lambda: datetime.datetime.now(datetime.UTC), nullable=False
+    )
 
     order_items: Mapped[list["OrderItem"]] = relationship(
         "OrderItem",
@@ -38,9 +41,6 @@ class OrderItem(Base, IdMixin):
 
     item_out_id: Mapped[int] = mapped_column(ForeignKey("item_out.id", ondelete="CASCADE"))
     order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete="CASCADE"))
-    sold_datetime: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.timezone.utc), nullable=False
-    )
 
     item_out: Mapped["ItemOut"] = relationship(
         "ItemOut",
