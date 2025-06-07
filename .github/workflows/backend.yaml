@@ -1,4 +1,4 @@
-name: Backend Contnious integration
+name: Backend CI/CD
 
 on:
   push:
@@ -63,3 +63,41 @@ jobs:
         run: |
           docker compose -f backend/products/docker-compose.yml down -v
           docker compose -f backend/users/docker-compose.yml down -v
+
+  backend-cd:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: backend-integration-ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy backend via SSH
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          ACCESS_TOKEN_EXPIRE_SECONDS: ${{ secrets.ACCESS_TOKEN_EXPIRE_SECONDS }}
+          REFRESH_TOKEN_EXPIRE_SECONDS: ${{ secrets.REFRESH_TOKEN_EXPIRE_SECONDS }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.SSH_TARGET }}/backend && \
+            git pull && \
+            export POSTGRES_USER='$POSTGRES_USER' && \
+            export POSTGRES_PASSWORD='$POSTGRES_PASSWORD' && \
+            export POSTGRES_DB='$POSTGRES_DB' && \
+            envsubst < products/.env.example > products/.env && \
+            export JWT_SECRET_KEY='$JWT_SECRET_KEY' && \
+            export ACCESS_TOKEN_EXPIRE_SECONDS='$ACCESS_TOKEN_EXPIRE_SECONDS' && \
+            export REFRESH_TOKEN_EXPIRE_SECONDS='$REFRESH_TOKEN_EXPIRE_SECONDS' && \
+            envsubst < users/.env.example > users/.env && \
+            docker compose -f products/docker-compose.yml up -d --build && \
+            docker compose -f users/docker-compose.yml up -d --build
+          "
