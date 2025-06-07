@@ -1,7 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Header from '@/components/Header'
-import ReactQueryProvider from './Providers'
+import ReactQueryProvider from '../components/Providers'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

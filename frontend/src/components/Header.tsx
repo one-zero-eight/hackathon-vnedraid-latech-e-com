@@ -22,7 +22,7 @@ const actions = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
-    <header className="relative flex w-full flex-row items-center justify-between px-4 py-8 md:justify-around">
+    <header className="relative flex w-full flex-row items-center justify-between rounded-b-3xl border-b border-gray-100 px-4 py-8 shadow-md md:justify-around">
       <div className="flex flex-row items-center gap-4 md:gap-16">
         <Image src={logo} alt="logo" className="h-auto" />
         <div className="hidden flex-row items-center justify-around gap-1 md:flex md:gap-6">
