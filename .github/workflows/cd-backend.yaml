@@ -22,6 +22,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             cd ${{ secrets.SSH_TARGET }}/backend && \
             git pull && \
-            docker-compose -f products/docker-compose.yml up -d --build && \
-            docker-compose -f users/docker-compose.yml up -d --build
+            docker compose -f products/docker-compose.yml up -d --build && \
+            docker compose -f users/docker-compose.yml up -d --build
           "

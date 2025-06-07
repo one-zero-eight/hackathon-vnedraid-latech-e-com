@@ -33,8 +33,8 @@ jobs:
 
       - name: Build and start all backend services
         run: |
-          docker-compose -f backend/products/docker-compose.yml up -d --build
-          docker-compose -f backend/users/docker-compose.yml up -d --build
+          docker compose -f backend/products/docker-compose.yml up -d --build
+          docker compose -f backend/users/docker-compose.yml up -d --build
 
       - name: Wait for services to be healthy
         run: |
@@ -42,14 +42,14 @@ jobs:
 
       - name: Run products tests
         run: |
-          docker-compose -f backend/products/docker-compose.yml exec -T fastapi_app pytest
+          docker compose -f backend/products/docker-compose.yml exec -T fastapi_app pytest
 
       - name: Run users tests
         run: |
-          docker-compose -f backend/users/docker-compose.yml exec -T fastapi_app pytest
+          docker compose -f backend/users/docker-compose.yml exec -T fastapi_app pytest
 
       - name: Stop all services
         if: always()
         run: |
-          docker-compose -f backend/products/docker-compose.yml down -v
-          docker-compose -f backend/users/docker-compose.yml down -v
+          docker compose -f backend/products/docker-compose.yml down -v
+          docker compose -f backend/users/docker-compose.yml down -v
