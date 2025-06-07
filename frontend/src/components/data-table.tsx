@@ -258,14 +258,8 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
                     <TableCell key={key}>
                       {isEditing && editableFields.includes(field) ? (
                         <Input
-                          type={'number'}
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          defaultValue={displayValue as number}
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement
-                            target.value = target.value.replace(/[^0-9]/g, '')
-                          }}
+                          type={field === 'name' ? 'string' : 'number'}
+                          defaultValue={displayValue as string | number}
                           onBlur={(e) => handleCellSave(row.lamoda_sku, field, e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -319,11 +313,16 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
         </Table>
       </div>
       {isEditing && (
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancelChanges}>
+        <div
+          className="sticky bottom-0 left-0 z-10 flex w-full flex-row items-center justify-center gap-2 border-t bg-white p-4"
+          style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.04)' }}
+        >
+          <Button variant="outline" onClick={handleCancelChanges} className="w-42">
             Отмена
           </Button>
-          <Button onClick={handleSaveChanges}>Сохранить</Button>
+          <Button onClick={handleSaveChanges} className="w-42">
+            Сохранить
+          </Button>
         </div>
       )}
     </div>
