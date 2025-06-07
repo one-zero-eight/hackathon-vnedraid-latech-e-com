@@ -5,6 +5,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models import Brand, ItemOut, Order, Product
+from src.db.models.order import OrderStatus
 
 
 class ItemRepository:
@@ -19,14 +20,12 @@ class ItemRepository:
         query = (
             select(
                 func.sum(Product.price * ItemOut.count)
-                .filter(Order.sold_datetime != None, Order.sold_datetime >= start)
+                .filter(Order.sold_datetime >= start)
                 .label("current"),
                 func.sum(Product.price * ItemOut.count)
                 .filter(
-                    Order.sold_datetime != None,
                     Order.sold_datetime >= start_prev,
                     Order.sold_datetime < start,
-                    Brand.seller_id == seller_id,
                 )
                 .label("previous"),
             )
@@ -34,11 +33,19 @@ class ItemRepository:
             .join(Product, Product.id == ItemOut.product_id)
             .join(Order, Order.id == ItemOut.order_id)
             .join(Brand, Brand.id == Product.brand_id)
+            .where(
+                Order.sold_datetime != None,
+                Brand.seller_id == seller_id,
+                Order.status == OrderStatus.COMPLETED,
+            )
         )
         result = await self.session.execute(query)
-        result = result.scalar_one()
+        result = result.first()
         if result:
-            return result.previous, result.current
+            return (
+                result.previous if result.previous else 0,
+                result.current if result.current else 0
+            )
         return 0, 0
 
     async def get_average_for_current_and_previos_number_of_days(
@@ -50,11 +57,15 @@ class ItemRepository:
             select(
                 func.sum(ItemOut.count * Product.price).label("order_total"),
             )
-            .filter(Order.sold_datetime != None, Brand.seller_id == seller_id)
             .select_from(ItemOut)
             .join(Product, Product.id == ItemOut.product_id)
             .join(Order, ItemOut.order_id == Order.id)
             .join(Brand, Brand.id == Product.brand_id)
+            .where(
+                Order.sold_datetime != None,
+                Brand.seller_id == seller_id,
+                Order.status == OrderStatus.COMPLETED,
+            )
             .group_by(Order.id)
         ).subquery()
 
@@ -72,7 +83,10 @@ class ItemRepository:
         )
 
         current_result = await self.session.execute(current_stmt)
-        current_result = current_result.scalar_one()
+        current_result = current_result.first()
         previous_result = await self.session.execute(previous_stmt)
-        previous_result = previous_result.scalar_one()
-        return previous_result, current_result
+        previous_result = previous_result.first()
+        return (
+            previous_result if previous_result else 0,
+            previous_result if previous_result else 0,
+        )

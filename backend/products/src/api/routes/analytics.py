@@ -29,7 +29,9 @@ async def get_total_income_by_period(
     prev_total, cur_total = (
         await item_repository.get_total_for_current_and_previos_number_of_days(days, seller.seller_id)
     )
-    if prev_total == 0:
+    if cur_total == 0:
+        ratio = -100
+    elif prev_total == 0:
         ratio = 100
     elif cur_total > prev_total:
         ratio = int(cur_total / prev_total * 100)
@@ -54,7 +56,9 @@ async def get_total_income_by_period(
     prev_average, cur_average = (
         await item_repository.get_average_for_current_and_previos_number_of_days(days, seller.seller_id)
     )
-    if prev_average == 0:
+    if cur_average == 0:
+        ratio = -100
+    elif prev_average == 0:
         ratio = 100
     elif cur_average > prev_average:
         ratio = int(cur_average / prev_average * 100)
