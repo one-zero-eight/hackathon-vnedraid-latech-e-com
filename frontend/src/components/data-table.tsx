@@ -19,24 +19,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Settings } from 'lucide-react'
-import { BrandRead, CategoryRead, ProductStatus } from '@/lib/types'
-import { NumberFilter, TextFilter, StatusFilter } from './filters'
-
-interface Product {
-  img_url: string
-  name: string
-  price: number
-  discount_price: number
-  count: number
-  description: string
-  size_width: number
-  size_height: number
-  size_depth: number
-  lamoda_sku: string
-  status: ProductStatus
-  brand: BrandRead
-  category: CategoryRead
-}
+import { BrandRead, CategoryRead, ProductStatus, Product } from '@/lib/types'
+import { NumberFilter, StatusFilter } from './filters'
 
 interface DataTableProps {
   data: Product[]
@@ -47,6 +31,7 @@ interface DataTableProps {
 }
 
 const columnLabels: Record<keyof Product, string> = {
+  id: 'ID',
   img_url: 'Изображение',
   name: 'Наименование',
   price: 'Цена',
@@ -85,6 +70,8 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
     field: keyof Product
   } | null>(null)
   const [filters, setFilters] = React.useState<Filters>({})
+  const [globalSearch, setGlobalSearch] = React.useState('')
+  const [activeNumericFilter, setActiveNumericFilter] = React.useState<keyof Product | null>(null)
 
   const handleRowSelect = (id: string) => {
     const newSelected = new Set(selectedRows)
@@ -111,6 +98,23 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
 
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
+      // First apply global text search
+      if (globalSearch) {
+        const searchLower = globalSearch.toLowerCase()
+        const hasTextMatch = Object.entries(item).some(([key, value]) => {
+          if (key === 'img_url') return false
+          if (key === 'brand' || key === 'category') {
+            return (value as BrandRead | CategoryRead).name.toLowerCase().includes(searchLower)
+          }
+          if (typeof value === 'string') {
+            return value.toLowerCase().includes(searchLower)
+          }
+          return false
+        })
+        if (!hasTextMatch) return false
+      }
+
+      // Then apply other filters
       return Object.entries(filters).every(([key, value]) => {
         const field = key as keyof Product
         const itemValue = item[field]
@@ -144,129 +148,151 @@ export function DataTable({ data, brands, categories, onEdit, onDelete }: DataTa
         return itemValue === value
       })
     })
-  }, [data, filters])
+  }, [data, filters, globalSearch])
 
   const editableFields: (keyof Product)[] = ['name', 'price', 'discount_price']
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]">
-              <Checkbox
-                checked={selectedRows.size === filteredData.length}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedRows(new Set(filteredData.map((item) => item.lamoda_sku)))
-                  } else {
-                    setSelectedRows(new Set())
-                  }
-                }}
-              />
-            </TableHead>
-            {Object.entries(columnLabels).map(([key, label]) => {
-              const field = key as keyof Product
-              return (
-                <TableHead key={key}>
-                  <div className="flex flex-col gap-2">
-                    <span>{label}</span>
-                    {field === 'img_url' ? null : field === 'status' ? (
-                      <StatusFilter
-                        value={filters[field] as ProductStatus | undefined}
-                        onChange={(value) => handleFilterChange(field, value)}
-                      />
-                    ) : typeof data[0]?.[field] === 'number' ? (
-                      <NumberFilter
-                        value={filters[field] as { from?: number; to?: number }}
-                        onChange={(value) => handleFilterChange(field, value)}
-                      />
-                    ) : (
-                      <TextFilter
-                        value={filters[field] as string}
-                        onChange={(value) => handleFilterChange(field, value)}
-                        placeholder={`Поиск по ${label.toLowerCase()}`}
-                      />
-                    )}
-                  </div>
-                </TableHead>
-              )
-            })}
-            <TableHead className="w-[50px]">
-              <Settings className="h-4 w-4" />
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredData.map((row) => (
-            <TableRow key={row.lamoda_sku}>
-              <TableCell>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Поиск по всем текстовым полям..."
+          value={globalSearch}
+          onChange={(e) => setGlobalSearch(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">
                 <Checkbox
-                  checked={selectedRows.has(row.lamoda_sku)}
-                  onCheckedChange={() => handleRowSelect(row.lamoda_sku)}
+                  checked={selectedRows.size === filteredData.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedRows(new Set(filteredData.map((item) => item.lamoda_sku)))
+                    } else {
+                      setSelectedRows(new Set())
+                    }
+                  }}
                 />
-              </TableCell>
-              {Object.entries(row).map(([key, value]) => {
+              </TableHead>
+              {Object.entries(columnLabels).map(([key, label]) => {
                 const field = key as keyof Product
-                const isEditing = editingCell?.id === row.lamoda_sku && editingCell?.field === field
-
                 return (
-                  <TableCell key={key}>
-                    {isEditing && editableFields.includes(field) ? (
-                      <Input
-                        type={field === 'name' ? 'text' : 'number'}
-                        defaultValue={value as string | number}
-                        onBlur={(e) => handleCellSave(row.lamoda_sku, field, e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleCellSave(row.lamoda_sku, field, e.currentTarget.value)
+                  <TableHead key={key} className="p-4">
+                    <div className="flex flex-col gap-2">
+                      <span
+                        className={typeof data[0]?.[field] === 'number' ? 'cursor-pointer' : ''}
+                        onClick={() => {
+                          if (typeof data[0]?.[field] === 'number') {
+                            setActiveNumericFilter(activeNumericFilter === field ? null : field)
                           }
                         }}
-                        autoFocus
-                      />
-                    ) : (
-                      <div
-                        className={editableFields.includes(field) ? 'cursor-pointer' : ''}
-                        onClick={() =>
-                          editableFields.includes(field) && handleCellEdit(row.lamoda_sku, field)
-                        }
                       >
-                        {field === 'img_url' ? (
-                          <img
-                            src={value as string}
-                            alt={row.name}
-                            className="h-10 w-10 object-cover"
+                        {label}
+                      </span>
+                      {field === 'img_url' ? null : field === 'status' ? (
+                        <StatusFilter
+                          value={filters[field] as ProductStatus | undefined}
+                          onChange={(value) => handleFilterChange(field, value)}
+                        />
+                      ) : typeof data[0]?.[field] === 'number' ? (
+                        activeNumericFilter === field && (
+                          <NumberFilter
+                            value={filters[field] as { from?: number; to?: number }}
+                            onChange={(value) => handleFilterChange(field, value)}
                           />
-                        ) : field === 'brand' ? (
-                          (value as BrandRead).name
-                        ) : field === 'category' ? (
-                          (value as CategoryRead).name
-                        ) : (
-                          value
-                        )}
-                      </div>
-                    )}
-                  </TableCell>
+                        )
+                      ) : null}
+                    </div>
+                  </TableHead>
                 )
               })}
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onDelete(row.lamoda_sku)}>
-                      Удалить
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+              <TableHead className="w-[50px]">
+                <Settings className="h-4 w-4" />
+              </TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {filteredData.map((row) => (
+              <TableRow key={row.lamoda_sku}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedRows.has(row.lamoda_sku)}
+                    onCheckedChange={() => handleRowSelect(row.lamoda_sku)}
+                  />
+                </TableCell>
+                {Object.entries(row).map(([key, value]) => {
+                  const field = key as keyof Product
+                  const isEditing =
+                    editingCell?.id === row.lamoda_sku && editingCell?.field === field
+
+                  return (
+                    <TableCell key={key}>
+                      {isEditing && editableFields.includes(field) ? (
+                        <Input
+                          type={'number'}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          defaultValue={value as number}
+                          onInput={(e) => {
+                            const target = e.target as HTMLInputElement
+                            target.value = target.value.replace(/[^0-9]/g, '')
+                          }}
+                          onBlur={(e) => handleCellSave(row.lamoda_sku, field, e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              handleCellSave(row.lamoda_sku, field, e.currentTarget.value)
+                            }
+                          }}
+                          autoFocus
+                        />
+                      ) : (
+                        <div
+                          className={editableFields.includes(field) ? 'cursor-pointer' : ''}
+                          onClick={() =>
+                            editableFields.includes(field) && handleCellEdit(row.lamoda_sku, field)
+                          }
+                        >
+                          {field === 'img_url' ? (
+                            <img
+                              src={value as string}
+                              alt={row.name}
+                              className="h-10 w-10 object-cover"
+                            />
+                          ) : field === 'brand' ? (
+                            (value as BrandRead).name
+                          ) : field === 'category' ? (
+                            (value as CategoryRead).name
+                          ) : (
+                            value
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
+                  )
+                })}
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onDelete(row.lamoda_sku)}>
+                        Удалить
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

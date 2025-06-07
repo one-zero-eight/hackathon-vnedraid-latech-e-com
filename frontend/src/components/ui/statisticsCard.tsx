@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-  CardFooter
-} from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { ArrowUpRight, ArrowDownRight, LucideIcon } from 'lucide-react'
 
 type Trend = 'up' | 'down'
