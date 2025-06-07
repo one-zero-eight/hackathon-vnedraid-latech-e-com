@@ -27,9 +27,9 @@ useEffect(() => {
       const response = await fetch(`/total_with_percent/30`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
 
       if (!response.ok) {
@@ -58,7 +58,7 @@ const stats = [
     title: 'Заказали на сумму',
     bottomLeftValue: totalAmount !== null ? totalAmount : 0,
     trend: totalTrendDirection,
-    trendValue: totalTrend !== null ? totalTrend : 0,
+    trendValue: totalTrend !== null ? totalTrend : 0
   },
   {
     icon: ReceiptText,
@@ -80,10 +80,7 @@ export default function Dashboard() {
   return (
     <main className="flex justify-center gap-6">
       {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
-        <div
-          key={idx}
-          className="flex-grow basis-0"
-        >
+        <div key={idx} className="flex-grow basis-0">
           <StatisticsCard
             icon={icon}
             title={title}
