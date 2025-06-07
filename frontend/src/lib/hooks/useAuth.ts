@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { getToken } from '../auth'
 
 const registerUser = async (formData: any) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/users/create`, {
@@ -28,6 +29,21 @@ const loginUser = async (formData: { login: string; password: string }) => {
   }
 
   return res.json() // probably returns JWT
+}
+
+export const getMe = async () => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/users/me`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  })
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch user')
+  }
+
+  return res.json()
 }
 
 export const useRegister = () => useMutation({ mutationFn: registerUser })
