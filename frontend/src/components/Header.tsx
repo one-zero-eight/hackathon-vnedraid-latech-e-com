@@ -1,8 +1,8 @@
-import Image from 'next/image'
-import logo from '../../public/assets/logo.svg'
-import Link from 'next/link'
 import { Menu, User } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
+import logo from '../../public/assets/logo.svg'
 
 const actions = [
   {
@@ -38,9 +38,13 @@ export default function Header() {
         </div>
       </div>
       <div className="flex flex-row items-center">
-        <div className="hidden md:block">
-          <User size={40} className="button-hover rounded-full" />
-        </div>
+        <Link
+          key={'profile'}
+          href={'/profile'}
+          className="button-hover hidden cursor-pointer rounded-full p-2 md:block"
+        >
+          <User size={30} className="rounded-full" />
+        </Link>
         <button
           className="block rounded-full p-2 transition-colors duration-300 hover:bg-gray-200 md:hidden"
           onClick={() => setMenuOpen((v) => !v)}
