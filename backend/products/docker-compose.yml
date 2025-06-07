@@ -1,0 +1,14 @@
+services:
+  database:
+    image: postgres:16-alpine3.19
+    container_name: postgres
+    env_file:
+      - .env
+    volumes:
+      - './postgres_data:/var/lib/postgresql/data'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 4s
+      timeout: 5s
+      retries: 5
