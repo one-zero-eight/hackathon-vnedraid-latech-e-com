@@ -8,7 +8,7 @@ from src.db.__mixin__ import IdMixin
 from src.db.models import Base
 
 if TYPE_CHECKING:
-    from src.db.models.order import OrderItem
+    from src.db.models.order import Order
     from src.db.models.product import Product
 
 
@@ -34,6 +34,8 @@ class ItemOut(Base, IdMixin):
     __tablename__ = "item_out"
 
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"), nullable=False)
+    order_id: Mapped[int] = mapped_column(ForeignKey("order.id", ondelete="CASCADE"))
+    count: Mapped[int]
 
     product: Mapped["Product"] = relationship(
         "Product",
@@ -43,9 +45,10 @@ class ItemOut(Base, IdMixin):
         uselist=False,
     )
 
-    order_items: Mapped["OrderItem"] = relationship(
-        "OrderItem",
-        back_populates="item_out",
+    order: Mapped["Order"] = relationship(
+        "Order",
+        foreign_keys=[order_id],
+        back_populates="order_items",
         lazy="joined",
         uselist=False,
     )
