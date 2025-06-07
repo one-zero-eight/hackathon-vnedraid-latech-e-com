@@ -1,49 +1,31 @@
 name: Continuous Delivery
+
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: false
-
-      - name: Build frontend
+      - name: Deploy frontend via SSH
         run: |
-          cd frontend
-          pnpm install
-          pnpm build
-
-      - name: Copy build to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "frontend/.next,frontend/public,frontend/package.json"
-          target: ${{ secrets.SSH_TARGET }}
-          port: 3000
-
-      - name: Run deploy script on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.SSH_TARGET }}/frontend
-            pnpm install --prod
-            pm2 restart frontend-app
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.SSH_TARGET }}/frontend && \
+            git pull && \
+            export PATH=\$PATH:/root/.local/share/pnpm/ && \
+            pnpm install && \
+            pnpm build && \
+            pm2 delete frontend-app 2>/dev/null || true && \
+            pm2 start pnpm --name frontend-app -- start
+          "
