@@ -4,14 +4,19 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { formFields } from '@/lib/constants'
+import { setToken } from '@/lib/auth'
+import { formFields, loginFields, numericFields } from '@/lib/constants'
 import { useLogin, useRegister } from '@/lib/hooks/useAuth'
 import { AuthFormField, UserData } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { validateField } from '@/lib/validate'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+
 export default function AuthPage() {
   const [step, setStep] = useState(1)
   const [isLogin, setIsLogin] = useState(true)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState<UserData>({
     username: '',
     email: '',
@@ -24,57 +29,76 @@ export default function AuthPage() {
     bank_name: ''
   })
 
+  const router = useRouter()
+  const { mutate: loginMutate } = useLogin()
+  const { mutate: registerMutate } = useRegister()
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleNumericInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const charCode = e.charCode || e.key.charCodeAt(0)
-    if (charCode !== 8 && charCode !== 9 && charCode !== 13 && (charCode < 48 || charCode > 57)) {
-      e.preventDefault()
-    }
-  }
-  const { mutate, isError, error, isSuccess, data } = useLogin()
-  const { mutate: registerMutate } = useRegister()
+    const allowedKeys = [
+      'Backspace',
+      'Tab',
+      'Enter',
+      'ArrowLeft',
+      'ArrowRight',
+      'Delete',
+      'Home',
+      'End'
+    ]
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const isShortcut =
+      (e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'r'].includes(e.key.toLowerCase())
+
+    const isDigit = /^[0-9]$/.test(e.key)
+
+    if (allowedKeys.includes(e.key) || isShortcut || isDigit) return
+
     e.preventDefault()
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const currentFields = isLogin
+      ? loginFields
+      : step === 1
+        ? formFields.user
+        : formFields.financial
+
+    const newErrors: Record<string, string> = {}
+    currentFields.forEach(({ id }) => {
+      const error = validateField(id, formData[id as keyof UserData])
+      if (error) newErrors[id] = error
+    })
+
+    setErrors(newErrors)
+    if (Object.keys(newErrors).length > 0) return
+
     if (!isLogin && step === 1) {
       setStep(2)
       return
     }
+
+    const onSuccess = (data: any) => {
+      const { access_token, refresh_token } = data
+      setToken(access_token, refresh_token)
+      router.push('/')
+    }
+
+    const onError = (error: any) => {
+      console.error(error)
+    }
+
     if (isLogin) {
-      const loginData = {
-        login: formData.email,
-        password: formData.password
-      }
-      mutate(loginData, {
-        onSuccess: (data) => {
-          console.log(data)
-        },
-        onError: (error) => {
-          console.log(error)
-        }
-      })
+      loginMutate({ login: formData.email, password: formData.password }, { onSuccess, onError })
     } else {
-      registerMutate(formData, {
-        onSuccess: (data) => {
-          console.log(data)
-        },
-        onError: (error) => {
-          console.log(error)
-        }
-      })
+      registerMutate(formData, { onSuccess, onError })
     }
   }
-
-  const loginFields: AuthFormField[] = [
-    { id: 'email', label: 'Почта', placeholder: 'Введите email', type: 'email' },
-    { id: 'password', label: 'Пароль', placeholder: 'Введите пароль', type: 'password' }
-  ]
-
-  const numericFields = ['inn', 'card_number', 'bank_code']
 
   const renderFields = (fields: AuthFormField[]) =>
     fields.map(({ id, label, placeholder, type = 'text' }) => (
@@ -91,23 +115,28 @@ export default function AuthPage() {
           pattern={numericFields.includes(id) ? '[0-9]*' : undefined}
           onKeyDown={numericFields.includes(id) ? handleNumericInput : undefined}
         />
+        {errors[id] && (
+          <p className="mt-1 text-sm text-red-600" role="alert">
+            {errors[id]}
+          </p>
+        )}
       </div>
     ))
+
+  const title = isLogin ? 'Вход' : step === 1 ? 'Регистрация' : 'Финансовые данные'
+
+  const description = isLogin
+    ? 'Войдите в свой аккаунт'
+    : step === 1
+      ? 'Пожалуйста, заполните данные пользователя'
+      : 'Пожалуйста, заполните финансовые данные'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50/50 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">
-            {isLogin ? 'Вход' : step === 1 ? 'Регистрация' : 'Финансовые данные'}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isLogin
-              ? 'Войдите в свой аккаунт'
-              : step === 1
-                ? 'Пожалуйста, заполните данные пользователя'
-                : 'Пожалуйста, заполните финансовые данные'}
-          </CardDescription>
+          <CardTitle className="text-center text-2xl">{title}</CardTitle>
+          <CardDescription className="text-center">{description}</CardDescription>
         </CardHeader>
 
         <CardContent>
