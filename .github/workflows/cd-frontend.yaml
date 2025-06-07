@@ -1,0 +1,31 @@
+name: Frontend Continuous delivery
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy frontend via SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.SSH_TARGET }}/frontend && \
+            git pull && \
+            export PATH=\$PATH:/root/.local/share/pnpm/ && \
+            pnpm install && \
+            pnpm build && \
+            pm2 delete frontend-app 2>/dev/null || true && \
+            pm2 start pnpm --name frontend-app -- start
+          "
