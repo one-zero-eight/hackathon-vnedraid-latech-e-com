@@ -1,8 +1,25 @@
-- name: Deploy backend via SSH
+name: Backend Continuous Delivery
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy backend via SSH
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PORT2: ${{ secrets.POSTGRES_PORT2 }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           ACCESS_TOKEN_EXPIRE_SECONDS: ${{ secrets.ACCESS_TOKEN_EXPIRE_SECONDS }}
           REFRESH_TOKEN_EXPIRE_SECONDS: ${{ secrets.REFRESH_TOKEN_EXPIRE_SECONDS }}
@@ -16,7 +33,7 @@
             export POSTGRES_USER='$POSTGRES_USER' && \
             export POSTGRES_PASSWORD='$POSTGRES_PASSWORD' && \
             export POSTGRES_DB='$POSTGRES_DB' && \
-            export POSTGRES_PORT=5433 && \
+            export POSTGRES_PORT='$POSTGRES_PORT2' && \
             envsubst < products/.env.example > products/.env && \
             export POSTGRES_PORT=5434 && \
             envsubst < users/.env.example > users/.env && \
