@@ -15,7 +15,7 @@ const actions = [
   },
   {
     label: 'Аналитика',
-    href: '#'
+    href: '/analytics'
   }
 ]
 
