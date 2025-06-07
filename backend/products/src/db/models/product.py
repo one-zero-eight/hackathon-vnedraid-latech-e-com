@@ -35,7 +35,7 @@ class Product(Base, IdMixin):
     size_depth: Mapped[int] = mapped_column(nullable=False)
     lamoda_sku: Mapped[str] = mapped_column(nullable=False)
     status: Mapped[ProductStatus] = mapped_column(
-        default=ProductStatus.INACTIVE, nullable=False
+        default=ProductStatus.INACTIVE
     )
 
     brand_id: Mapped[int] = mapped_column(
