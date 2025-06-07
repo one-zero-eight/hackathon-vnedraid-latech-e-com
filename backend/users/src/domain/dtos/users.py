@@ -99,7 +99,7 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
             value = phonenumbers.parse(value, "RU")
             if phonenumbers.is_valid_number(value):
                 return str(value.country_code) + str(value.national_number)
-            raise NumberParseException
+            raise ValueError("phone number is not valid")
         except NumberParseException as e:
             raise ValueError("phone number is not valid") from e
 
