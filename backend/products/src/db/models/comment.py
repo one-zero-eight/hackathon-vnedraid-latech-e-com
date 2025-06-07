@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Column, Text
+from sqlalchemy import Column, ForeignKey, Text
 from sqlalchemy.orm import Mapped, relationship
 
 from src.db.__mixin__ import IdMixin
