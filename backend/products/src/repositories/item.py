@@ -90,3 +90,39 @@ class ItemRepository:
             previous_result if previous_result else 0,
             previous_result if previous_result else 0,
         )
+
+    async def get_total_bought_products_for_current_and_previos_number_of_days(
+        self, days: int, seller_id: int
+    ) -> tuple[int, int]:
+        start = date.today() - timedelta(days=days - 1)
+        start_prev = start - timedelta(days)
+        query = (
+            select(
+                func.sum(ItemOut.count)
+                .filter(Order.sold_datetime >= start)
+                .label("current"),
+                func.sum(ItemOut.count)
+                .filter(
+                    Order.sold_datetime >= start_prev,
+                    Order.sold_datetime < start,
+                )
+                .label("previous"),
+            )
+            .select_from(ItemOut)
+            .join(Product, Product.id == ItemOut.product_id)
+            .join(Order, Order.id == ItemOut.order_id)
+            .join(Brand, Brand.id == Product.brand_id)
+            .where(
+                Order.sold_datetime != None,
+                Brand.seller_id == seller_id,
+                Order.status == OrderStatus.COMPLETED,
+            )
+        )
+        result = await self.session.execute(query)
+        result = result.first()
+        if result:
+            return (
+                result.previous if result.previous else 0,
+                result.current if result.current else 0
+            )
+        return 0, 0
