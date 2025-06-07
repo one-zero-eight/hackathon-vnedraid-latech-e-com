@@ -4,6 +4,7 @@ from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 
@@ -63,6 +64,13 @@ def create_app() -> FastAPI:
         FastAPI: Fastapi application
     """
     app = FastAPI(root_path="/api/v1")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=".*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(user_router)
     app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
