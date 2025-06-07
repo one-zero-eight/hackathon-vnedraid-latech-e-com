@@ -2,21 +2,22 @@ import datetime
 import re
 from typing import ClassVar
 
-from pydantic import BaseModel, EmailStr, field_validator
-
-from src.domain.dtos.password import PasswordDTO
 import phonenumbers
 from phonenumbers.phonenumberutil import NumberParseException
+from pydantic import BaseModel, EmailStr, field_validator
+from stdnum import luhn
+
+from src.domain.dtos.password import PasswordDTO
 
 
 class UserBaseDTO(BaseModel):
     username: str
     email: EmailStr
     name: str
+    phone_number: str
     inn: str
     card_number: str
     bank_code: str
-    phone_number: str
     bank_name: str
 
 
@@ -41,39 +42,54 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
     @classmethod
     def validate_inn(cls, value: str) -> str:
         if len(value) not in (10, 12):
-            raise ValueError(
-                "inn must be a string of 10 or 12 digits"
-            )
+            raise ValueError("INN must be a string of 10 or 12 digits")
         if not value.isnumeric():
-            raise ValueError(
-                "inn must consist only of digits"
+            raise ValueError("INN must consist only of digits")
+        if len(value) == 10:
+            coefficients = [2, 4, 10, 3, 5, 9, 4, 6, 8]
+            check_sum = (
+                sum(int(value[i]) * coefficients[i] for i in range(9))
+                % 11
+                % 10
             )
-        return value
+            valid = check_sum == int(value[9])
+            if not valid:
+                raise ValueError("INN is not valid")
+            return value
+        if len(value) == 12:
+            coefficients_11 = [7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
+            check_sum_11 = (
+                sum(int(value[i]) * coefficients_11[i] for i in range(10))
+                % 11
+                % 10
+            )
+            coefficients_12 = [3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
+            check_sum_12 = (
+                sum(int(value[i]) * coefficients_12[i] for i in range(11))
+                % 11
+                % 10
+            )
+            valid = check_sum_11 == int(value[10]) and check_sum_12 == int(
+                value[11]
+            )
+            if not valid:
+                raise ValueError("INN is not valid")
+            return value
 
     @field_validator("card_number")
     @classmethod
     def validate_card_number(cls, value: str) -> str:
-        if len(value) != 20:
-            raise ValueError(
-                "card number must be a string of 20 digits"
-            )
-        if not value.isnumeric():
-            raise ValueError(
-                "card number must consist only of digits"
-            )
+        if not luhn.is_valid(value):
+            raise ValueError("card number is invalid")
         return value
 
     @field_validator("bank_code")
     @classmethod
     def validate_bank_code(cls, value: str) -> str:
         if len(value) != 9:
-            raise ValueError(
-                "bank code must be a string of 9 digits"
-            )
+            raise ValueError("bank code must be a string of 9 digits")
         if not value.isnumeric():
-            raise ValueError(
-                "bank code must consist only of digits"
-            )
+            raise ValueError("bank code must consist only of digits")
         return value
 
     @field_validator("phone_number")
@@ -85,7 +101,7 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
                 return str(value.country_code) + str(value.national_number)
             raise NumberParseException
         except NumberParseException as e:
-            raise ValueError("phone number is not valid") from e 
+            raise ValueError("phone number is not valid") from e
 
 
 class UserReadDTO(UserBaseDTO):

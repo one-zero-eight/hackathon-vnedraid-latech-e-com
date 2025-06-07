@@ -23,4 +23,5 @@ class User(Base):
     inn: Mapped[str] = mapped_column(String(12), unique=True)
     card_number: Mapped[str] = mapped_column(String(20))
     bank_code: Mapped[str] = mapped_column(String(9))
-    phone_number: Mapped[str] = mapped_column(String(18), unique=True)    
+    phone_number: Mapped[str] = mapped_column(String(18), unique=True)
+    bank_name: Mapped[str]
