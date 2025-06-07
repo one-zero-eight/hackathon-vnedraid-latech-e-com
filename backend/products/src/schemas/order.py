@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from src.db.models.order import OrderStatus
+from src.db.models import OrderStatus
 from src.schemas.item import ItemOutCreate, ItemOutRead
 
 
