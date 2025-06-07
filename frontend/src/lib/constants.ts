@@ -17,7 +17,7 @@ export const formFields = {
     { id: 'inn', label: 'ИНН', placeholder: 'Введите ИНН' },
     { id: 'card_number', label: 'Номер карты', placeholder: 'Введите номер карты' },
     { id: 'bank_code', label: 'БИК', placeholder: 'Введите БИК' },
-    { id: 'bank_name', label: 'Название банка', placeholder: 'Введите название банка' }
+    { id: 'bank_name', label: 'Название банка', placeholder: 'Название банка не найдено' }
   ]
 }
 
