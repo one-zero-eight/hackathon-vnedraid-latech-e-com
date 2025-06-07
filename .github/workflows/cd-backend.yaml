@@ -1,0 +1,27 @@
+name: Backend Continuous Delivery
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy backend via SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            cd ${{ secrets.SSH_TARGET }}/backend && \
+            git pull && \
+            docker-compose -f products/docker-compose.yml up -d --build && \
+            docker-compose -f users/docker-compose.yml up -d --build
+          "
