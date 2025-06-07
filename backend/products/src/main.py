@@ -4,6 +4,9 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
+from fastapi_derive_responses import AutoDeriveResponsesAPIRoute
+from fastapi_swagger import patch_fastapi
+from starlette.middleware.cors import CORSMiddleware
 
 from src.api.routes.analytics import router as analytics_router
 from src.dependencies import create_async_container
@@ -45,6 +48,18 @@ async def validation_exception_handler(
 
 def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1")
+    app.router.route_class = AutoDeriveResponsesAPIRoute
+
+    patch_fastapi(app)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=".*",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     app.include_router(analytics_router)
     app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
