@@ -1,5 +1,5 @@
-import { ShoppingCart } from "lucide-react";
-import StatisticsCard from '@/components/ui/statisticsCard';
+import { ShoppingCart } from 'lucide-react'
+import StatisticsCard from '@/components/ui/statisticsCard'
 
 const stats = [
   {
@@ -7,27 +7,27 @@ const stats = [
     title: 'Продажи',
     bottomLeftValue: 12500,
     trend: 'up' as const,
-    trendValue: 12.5,
+    trendValue: 12.5
   },
   {
     icon: ShoppingCart,
     title: 'Заказы',
     bottomLeftValue: 842,
     trend: 'down' as const,
-    trendValue: 3.2,
+    trendValue: 3.2
   },
   {
     icon: ShoppingCart,
     title: 'Клиенты',
     bottomLeftValue: 3500,
     trend: 'up' as const,
-    trendValue: 8.1,
-  },
-];
+    trendValue: 8.1
+  }
+]
 
 export default function Dashboard() {
   return (
-    <main className="flex gap-6 justify-center">
+    <main className="flex justify-center gap-6">
       {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
         <div
           key={idx}
@@ -43,6 +43,5 @@ export default function Dashboard() {
         </div>
       ))}
     </main>
-  );
+  )
 }
-
