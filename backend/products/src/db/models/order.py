@@ -33,7 +33,6 @@ class Order(Base, IdMixin):
     )
 
 
-
 class OrderItem(Base, IdMixin):
     __tablename__ = "order_item"
 

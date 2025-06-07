@@ -1,15 +1,15 @@
-from typing import TYPE_CHECKING
 import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.__mixin__ import IdMixin
 from src.db.models import Base
 
 if TYPE_CHECKING:
-    from src.db.models.product import Product
     from src.db.models.order import OrderItem
+    from src.db.models.product import Product
 
 
 class ItemIn(Base, IdMixin):

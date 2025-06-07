@@ -11,3 +11,9 @@ dependencies = [
     "pydantic-settings>=2.9.1",
     "sqlalchemy>=2.0.41",
 ]
+
+[tool.ruff]
+line-length = 120
+lint.ignore = ["PLR"]
+lint.extend-select = ["I", "UP", "PL"]
+target-version = "py312"
