@@ -34,7 +34,6 @@ jobs:
           export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
           export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
           export POSTGRES_PORT="${{ secrets.POSTGRES_PORT2 }}"
-          export POSTGRES_HOSTU="${{ secrets.POSTGRES_HOSTU }}"
           envsubst < backend/products/.env.example > backend/products/.env
 
       - name: Создать .env с секретами для users
@@ -43,7 +42,6 @@ jobs:
           export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
           export POSTGRES_DB="${{ secrets.POSTGRES_DB }}"
           export POSTGRES_PORT=5434
-          export POSTGRES_HOSTP="${{ secrets.POSTGRES_HOSTP }}"
           export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
           export ACCESS_TOKEN_EXPIRE_SECONDS="${{ secrets.ACCESS_TOKEN_EXPIRE_SECONDS }}"
           export REFRESH_TOKEN_EXPIRE_SECONDS="${{ secrets.REFRESH_TOKEN_EXPIRE_SECONDS }}"

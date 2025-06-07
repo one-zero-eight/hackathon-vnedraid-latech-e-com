@@ -20,8 +20,6 @@ jobs:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_PORT2: ${{ secrets.POSTGRES_PORT2 }}
-          POSTGRES_HOSTU: ${{ secrets.POSTGRES_HOSTU }}
-          POSTGRES_HOSTP: ${{ secrets.POSTGRES_HOSTP }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
           ACCESS_TOKEN_EXPIRE_SECONDS: ${{ secrets.ACCESS_TOKEN_EXPIRE_SECONDS }}
           REFRESH_TOKEN_EXPIRE_SECONDS: ${{ secrets.REFRESH_TOKEN_EXPIRE_SECONDS }}
@@ -35,15 +33,12 @@ jobs:
             export POSTGRES_USER='$POSTGRES_USER' && \
             export POSTGRES_PASSWORD='$POSTGRES_PASSWORD' && \
             export POSTGRES_DB='$POSTGRES_DB' && \
-            export POSTGRES_HOSTU="${{ secrets.POSTGRES_HOSTU }}" \
             export POSTGRES_PORT='$POSTGRES_PORT2' && \
             envsubst < products/.env.example > products/.env && \
-            export POSTGRES_HOSTP="${{ secrets.POSTGRES_HOSTP }}"
-            export POSTGRES_PORT=5434 && \
-            envsubst < users/.env.example > users/.env && \
             export JWT_SECRET_KEY='$JWT_SECRET_KEY' && \
             export ACCESS_TOKEN_EXPIRE_SECONDS='$ACCESS_TOKEN_EXPIRE_SECONDS' && \
             export REFRESH_TOKEN_EXPIRE_SECONDS='$REFRESH_TOKEN_EXPIRE_SECONDS' && \
+            envsubst < users/.env.example > users/.env && \
             docker compose -f products/docker-compose.yml up -d --build && \
             docker compose -f users/docker-compose.yml up -d --build
           "
