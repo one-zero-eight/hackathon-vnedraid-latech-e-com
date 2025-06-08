@@ -15,11 +15,11 @@ class ProductRead(BaseModel):
     discount_price: float
     img_url: str
     count: int
-    description: str
-    size_width: int
-    size_height: int
-    size_depth: int
-    lamoda_sku: str
+    description: str | None = None
+    size_width: int | None = None
+    size_height: int | None = None
+    size_depth: int | None = None
+    lamoda_sku: str | None = None
     status: ProductStatus
     brand: BrandRead
     category: CategoryRead
