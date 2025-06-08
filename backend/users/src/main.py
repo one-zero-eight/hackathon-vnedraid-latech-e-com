@@ -72,7 +72,7 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
-        allow_origins=settings.ALLOWED_ORIGINS.split(','),
+        allow_origins=["*"],
     )
     app.include_router(user_router)
     app.openapi_schema = get_openapi_schema(app)
