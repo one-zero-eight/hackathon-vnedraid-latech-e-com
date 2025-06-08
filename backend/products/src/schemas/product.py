@@ -1,14 +1,11 @@
-from typing import TYPE_CHECKING
-
 from pydantic import BaseModel, ConfigDict
 
 from src.db.models import ProductStatus
 
-if TYPE_CHECKING:
-    from src.schemas.brand import BrandRead
-    from src.schemas.category import CategoryRead
-    from src.schemas.comment import CommentRead
-    from src.schemas.item import ItemInRead, ItemOutRead
+from src.schemas.brand import BrandRead
+from src.schemas.category import CategoryRead
+from src.schemas.comment import CommentRead
+from src.schemas.item import ItemInRead, ItemOutRead
 
 
 class ProductRead(BaseModel):
@@ -24,12 +21,12 @@ class ProductRead(BaseModel):
     size_depth: int
     lamoda_sku: str
     status: ProductStatus
-    brand: "BrandRead"
-    category: "CategoryRead"
-    comments: list["CommentRead"] = []
+    brand: BrandRead
+    category: CategoryRead
+    comments: list[CommentRead] = []
 
-    items_in: list["ItemInRead"] = []
-    items_out: list["ItemOutRead"] = []
+    items_in: list[ItemInRead] = []
+    items_out: list[ItemOutRead] = []
 
     model_config = ConfigDict(from_attributes=True)
 
