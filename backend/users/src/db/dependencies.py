@@ -27,9 +27,7 @@ class DbProvider(Provider):
         await engine.dispose()
 
     @provide
-    def get_pool(
-        self, engine: AsyncEngine
-    ) -> async_sessionmaker[AsyncSession]:
+    def get_pool(self, engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
         return async_sessionmaker(
             autocommit=False,
             autoflush=False,

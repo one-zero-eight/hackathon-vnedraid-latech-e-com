@@ -26,14 +26,10 @@ class JwtTokenManager(ITokenManager):
             data_to_encode["exp"] = creation_time + datetime.timedelta(
                 seconds=settings.REFRESH_TOKEN_EXPIRE_SECONDS
             )
-        return jwt.encode(
-            data_to_encode, settings.JWT_SECRET_KEY, algorithm="HS256"
-        )
+        return jwt.encode(data_to_encode, settings.JWT_SECRET_KEY, algorithm="HS256")
 
     def decode_token(self, token: str) -> dict:
-        payload = jwt.decode(
-            token, settings.JWT_SECRET_KEY, algorithms=["HS256"]
-        )
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
         return payload
 
     def get_validated_token_data(

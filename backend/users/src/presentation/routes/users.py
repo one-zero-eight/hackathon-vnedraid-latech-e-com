@@ -12,9 +12,7 @@ from src.domain.interfaces.use_cases.users import IUserUseCase
 from src.presentation.dtos import HttpErrorDTO, UserIdDTO
 
 
-user_router = APIRouter(
-    prefix="/users", tags=["Users"], route_class=DishkaRoute
-)
+user_router = APIRouter(prefix="/users", tags=["Users"], route_class=DishkaRoute)
 
 
 @user_router.post(
@@ -57,9 +55,7 @@ async def get_new_access_token(
     refresh_token: Annotated[str, Body(embed=True)],
     user_use_case: FromDishka[IUserUseCase],
 ) -> AccessTokenDTO:
-    return await user_use_case.get_new_access_token_by_refresh_token(
-        refresh_token
-    )
+    return await user_use_case.get_new_access_token_by_refresh_token(refresh_token)
 
 
 @user_router.get(

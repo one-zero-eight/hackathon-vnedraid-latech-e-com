@@ -50,9 +50,7 @@ async def validation_exception_handler(
     )
 
 
-async def app_exception_handler(
-    request: Request, exc: AppException
-) -> JSONResponse:
+async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     return JSONResponse(
         status_code=exc.status_code,
         content=jsonable_encoder({"detail": exc.detail}),

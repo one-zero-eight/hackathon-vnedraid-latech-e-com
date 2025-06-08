@@ -13,9 +13,7 @@ class CredentialsProvider(Provider):
     scope = Scope.REQUEST
 
     @provide
-    async def get_access_token(
-        self, request: Request
-    ) -> HTTPAuthorizationCredentials:
+    async def get_access_token(self, request: Request) -> HTTPAuthorizationCredentials:
         return await HTTPBearer()(request)
 
     @provide

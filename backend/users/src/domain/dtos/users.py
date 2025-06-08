@@ -33,8 +33,7 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
             )
         if not cls.USERNAME_PATTERN.match(value):
             raise ValueError(
-                "username must consist only of english "
-                "letters, digits and _ sign",
+                "username must consist only of english letters, digits and _ sign",
             )
         return value
 
@@ -47,11 +46,7 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
             raise ValueError("INN must consist only of digits")
         if len(value) == 10:
             coefficients = [2, 4, 10, 3, 5, 9, 4, 6, 8]
-            check_sum = (
-                sum(int(value[i]) * coefficients[i] for i in range(9))
-                % 11
-                % 10
-            )
+            check_sum = sum(int(value[i]) * coefficients[i] for i in range(9)) % 11 % 10
             valid = check_sum == int(value[9])
             if not valid:
                 raise ValueError("INN is not valid")
@@ -59,19 +54,13 @@ class UserCreateDTO(UserBaseDTO, PasswordDTO):
         if len(value) == 12:
             coefficients_11 = [7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
             check_sum_11 = (
-                sum(int(value[i]) * coefficients_11[i] for i in range(10))
-                % 11
-                % 10
+                sum(int(value[i]) * coefficients_11[i] for i in range(10)) % 11 % 10
             )
             coefficients_12 = [3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
             check_sum_12 = (
-                sum(int(value[i]) * coefficients_12[i] for i in range(11))
-                % 11
-                % 10
+                sum(int(value[i]) * coefficients_12[i] for i in range(11)) % 11 % 10
             )
-            valid = check_sum_11 == int(value[10]) and check_sum_12 == int(
-                value[11]
-            )
+            valid = check_sum_11 == int(value[10]) and check_sum_12 == int(value[11])
             if not valid:
                 raise ValueError("INN is not valid")
             return value

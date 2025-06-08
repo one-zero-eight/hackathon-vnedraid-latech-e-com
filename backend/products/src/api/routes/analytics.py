@@ -4,18 +4,12 @@ from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from src.schemas.responses import RatioResponse, IntervalWithCountResponse
 
 from src.repositories.item import ItemRepository
 from src.schemas.seller import SellerIdScheme
 
 router = APIRouter(tags=["Analytics"], route_class=DishkaRoute)
-
-
-class RatioResponse(BaseModel):
-    current: Decimal
-    previous: Decimal
-    ratio: int
 
 
 @router.get("/total_with_percent/{days:int}")
@@ -106,4 +100,24 @@ async def get_total_bought_products_by_period(
 async def get_categories_with_count_bought_items(
     days: int, item_repository: FromDishka[ItemRepository], seller: FromDishka[SellerIdScheme]
 ) -> JSONResponse:
+    if days < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="number of days must be greater than 0",
+        )
     return await item_repository.get_categories_with_number_of_bought_items(days, seller.seller_id)
+
+
+@router.get('/count_bought_by_intervals/{days:int}/{intervals:int}')
+async def get_count_bought_items_by_intervals(days: int, intervals: int, item_repository: FromDishka[ItemRepository], seller: FromDishka[SellerIdScheme]) -> list[IntervalWithCountResponse]:
+    if days < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="number of days must be greater than 0",
+        )
+    if not (2 <= intervals <= 12):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="number of intervals must be between 2 and 12",
+        )
+    return await item_repository.get_count_bought_items_by_intervals(days, intervals, seller.seller_id)

@@ -47,17 +47,13 @@ class PostgresUserRepository(IUserRepository):
             return UserDoesNotExistException()
         return UserDTO.model_validate(user_result, from_attributes=True)
 
-    async def update_user_password(
-        self, user_id: int, new_password: str
-    ) -> None:
+    async def update_user_password(self, user_id: int, new_password: str) -> None:
         password_update_query = (
             update(User)
             .where(User.id == user_id)
             .values(
                 hashed_password=new_password,
-                password_updated_at=datetime.datetime.now(
-                    datetime.timezone.utc
-                ),
+                password_updated_at=datetime.datetime.now(datetime.timezone.utc),
             )
         )
         await self.session.execute(password_update_query)

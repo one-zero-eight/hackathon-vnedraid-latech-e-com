@@ -31,9 +31,7 @@ class UserUseCase(IUserUseCase):
         self.token_manager = token_manager
 
     async def create_user(self, user_data: UserCreateDTO) -> UserDTO:
-        user_data.password = self.password_manager.hash_password(
-            user_data.password
-        )
+        user_data.password = self.password_manager.hash_password(user_data.password)
         async with self.uow.start():
             return await self.uow.users.add(user_data)
 
@@ -72,13 +70,9 @@ class UserUseCase(IUserUseCase):
             ),
         )
 
-    async def get_new_access_token_by_refresh_token(
-        self, token: str
-    ) -> AccessTokenDTO:
+    async def get_new_access_token_by_refresh_token(self, token: str) -> AccessTokenDTO:
         async with self.uow.start():
-            result_user = await self._get_user_by_token(
-                token, TokenTypeEnum.REFRESH
-            )
+            result_user = await self._get_user_by_token(token, TokenTypeEnum.REFRESH)
         access_token = self.token_manager.create_token(
             str(result_user.id), TokenTypeEnum.ACCESS
         )
@@ -101,12 +95,8 @@ class UserUseCase(IUserUseCase):
     async def _get_user_by_token(
         self, token: str, token_type: TokenTypeEnum
     ) -> UserDTO:
-        payload = self.token_manager.get_validated_token_data(
-            token, token_type
-        )
-        result_user = await self.uow.users.get_user_by_id(
-            int(payload.get("sub"))
-        )
+        payload = self.token_manager.get_validated_token_data(token, token_type)
+        result_user = await self.uow.users.get_user_by_id(int(payload.get("sub")))
         if (
             payload.get("iat")
             < (

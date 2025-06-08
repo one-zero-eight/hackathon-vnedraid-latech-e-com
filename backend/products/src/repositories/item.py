@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.models import Brand, ItemOut, Order, Product, Category
 from src.db.models.order import OrderStatus
+from src.schemas.responses import IntervalWithCountResponse
 
 
 class ItemRepository:
@@ -152,3 +153,40 @@ class ItemRepository:
             item[0]: item[1]
             for item in results
         }
+
+    async def get_count_bought_items_by_intervals(self, days: int, intervals: int, seller_id: int):
+        end = date.today() + timedelta(days=1)
+        start = date.today() - timedelta(days - 1)
+        result = []
+        for _ in range(intervals):
+            query = select(
+                func.sum(ItemOut.count)
+            ).select_from(
+                ItemOut
+            ).join(
+                Product, Product.id == ItemOut.product_id
+            ).join(
+                Brand, Brand.id == Product.brand_id
+            ).join(
+                Order, ItemOut.order_id == Order.id
+            ).where(
+                Brand.seller_id == seller_id,
+                Order.sold_datetime != None,
+                Order.sold_datetime >= start,
+                Order.sold_datetime < end,
+                Order.status == OrderStatus.COMPLETED,
+            )
+            count = await self.session.execute(query)
+            count = count.scalar_one()
+            count = count if count else 0
+            result.append(
+                IntervalWithCountResponse(
+                    start_date=start,
+                    end_date=end,
+                    count=count,
+                )
+            )
+            end = start
+            start -= timedelta(days=days)
+        result.reverse()
+        return result

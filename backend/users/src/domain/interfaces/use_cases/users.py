@@ -26,9 +26,7 @@ class IUserUseCase(ABC):
         pass
 
     @abstractmethod
-    def get_new_access_token_by_refresh_token(
-        self, token: str
-    ) -> AccessTokenDTO:
+    def get_new_access_token_by_refresh_token(self, token: str) -> AccessTokenDTO:
         pass
 
     @abstractmethod
