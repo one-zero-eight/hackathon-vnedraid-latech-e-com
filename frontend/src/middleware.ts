@@ -4,17 +4,17 @@ import { NextResponse } from 'next/server'
 const publicPaths = ['/auth']
 
 export function middleware(request: NextRequest) {
-  // const token = request.cookies.get('token')?.value
-  // const { pathname } = request.nextUrl
-  //
-  // if (publicPaths.includes(pathname)) {
-  //   return NextResponse.next()
-  // }
-  //
-  // if (!token) {
-  //   const url = new URL('/auth', request.url)
-  //   return NextResponse.redirect(url)
-  // }
+  const token = request.cookies.get('token')?.value
+  const { pathname } = request.nextUrl
+
+  if (publicPaths.includes(pathname)) {
+    return NextResponse.next()
+  }
+
+  if (!token) {
+    const url = new URL('/auth', request.url)
+    return NextResponse.redirect(url)
+  }
 
   return NextResponse.next()
 }
