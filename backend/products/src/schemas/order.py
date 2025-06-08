@@ -1,9 +1,12 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
 from src.db.models import OrderStatus
-from src.schemas.item import ItemOutCreate, ItemOutRead
+
+if TYPE_CHECKING:
+    from src.schemas.item import ItemOutCreate, ItemOutRead
 
 
 class OrderRead(BaseModel):

@@ -8,7 +8,6 @@ from fastapi_derive_responses import AutoDeriveResponsesAPIRoute
 from fastapi_swagger import patch_fastapi
 from starlette.middleware.cors import CORSMiddleware
 
-from src.api.routes.analytics import router as analytics_router
 from src.dependencies import create_async_container
 
 
@@ -46,7 +45,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1")
-    app.router.route_class = AutoDeriveResponsesAPIRoute
+    # app.router.route_class = AutoDeriveResponsesAPIRoute
 
     patch_fastapi(app)
 
@@ -58,11 +57,28 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    from src.api.routes.analytics import router as analytics_router
+    from src.api.routes.brand import brand_router
+    from src.api.routes.categories import category_router
+    from src.api.routes.comments import comment_router
+    from src.api.routes.items import item_in_router, item_out_router
+    from src.api.routes.orders import order_router
+    from src.api.routes.product import product_router
+
     app.include_router(analytics_router)
-    app.openapi_schema = get_openapi_schema(app)
+    app.include_router(brand_router)
+    app.include_router(category_router)
+    app.include_router(product_router)
+    app.include_router(comment_router)
+    app.include_router(order_router)
+    app.include_router(item_in_router)
+    app.include_router(item_out_router)
+
+    # app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
     setup_dishka(container, app)
     app.exception_handler(RequestValidationError)(validation_exception_handler)
+
     return app
 
 
