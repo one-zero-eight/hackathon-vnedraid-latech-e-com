@@ -1,82 +1,114 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { ShoppingCart, Wallet, ReceiptText } from 'lucide-react'
 import StatisticsCard from '@/components/ui/statisticsCard'
-import { getToken, getUserIdFromToken } from '@/lib/auth'
+import { getToken } from '@/lib/auth'
+import { useQuery } from '@tanstack/react-query'
+import { getMe } from '@/lib/hooks/useAuth'
 
-const [totalAmount, setTotalAmount] = useState<number | null>(null)
-const [totalTrend, setTotalTrend] = useState<number | null>(null)
-const [totalTrendDirection, setTotalTrendDirection] = useState<'up' | 'down'>('up')
+export default function Dashboard() {
+  const [totalAmount, setTotalAmount] = useState<number | null>(null)
+  const [totalTrend, setTotalTrend] = useState<number | null>(null)
+  const [averageAmount, setAverageAmount] = useState<number | null>(null)
+  const [averageTrend, setAverageTrend] = useState<number | null>(null)
+  const [totalTrendDirection, setTotalTrendDirection] = useState<'up' | 'down'>('up')
+  const [averageTrendDirection, setAverageTrendDirection] = useState<'up' | 'down'>('up')
 
-useEffect(() => {
-  async function fetchData() {
-    const token = getToken()
+  const { data: user, isLoading } = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+    staleTime: 60 * 60 * 1000
+  })
 
-    if (!token) {
-      console.error('No token available')
-      return
-    }
+  useEffect(() => {
+    async function fetchData() {
+      const token = getToken()
 
-    const userId = await getUserIdFromToken(token)
-
-    if (!userId) {
-      console.error('Failed to get user id')
-      return
-    }
-
-    try {
-      const response = await fetch(`/total_with_percent/30`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        console.error(`Failed to fetch total_with_percent: ${response.status}`)
+      if (!token || !user?.id) {
+        console.error('No token or user ID available')
         return
       }
 
-      const data = await response.json()
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/total_with_percent/30`, {
+          method: 'GET',
+          headers: {
+            "X-User-Id": user.id
+          },
+        })
 
-      if (data) {
-        setTotalAmount(data.total)
-        setTotalTrend(Math.abs(data.percent))
-        setTotalTrendDirection(data.percent >= 0 ? 'up' : 'down')
+        if (!response.ok) {
+          console.error(`Failed to fetch total_with_percent: ${response.status}`)
+          return
+        }
+
+        const data = await response.json()
+
+        if (data) {
+          const total = data.current - data.previous;
+          setTotalAmount(total)
+          setTotalTrend(Math.abs(data.ratio))
+          setTotalTrendDirection(data.ratio >= 0 ? 'up' : 'down')
+        }
+      } catch (error) {
+        console.error('Error fetching total_with_percent:', error)
       }
-    } catch (error) {
-      console.error('Error fetching total_with_percent:', error)
+
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/average_with_percent/30`, {
+          method: 'GET',
+          headers: {
+            "X-User-Id": user.id
+          },
+        })
+
+        if (!response.ok) {
+          console.error(`Failed to fetch average_with_percent: ${response.status}`)
+          return
+        }
+
+        const data = await response.json()
+
+        if (data) {
+          const total = data.current - data.previous;
+          setAverageAmount(total)
+          setAverageTrend(Math.abs(data.ratio))
+          setAverageTrendDirection(data.ratio >= 0 ? 'up' : 'down')
+        }
+      } catch (error) {
+        console.error('Error fetching average_with_percent:', error)
+      }
     }
-  }
 
-  fetchData()
-}, [])
+    fetchData()
+  }, [user?.id])
 
-const stats = [
-  {
-    icon: Wallet,
-    title: 'Заказали на сумму',
-    bottomLeftValue: totalAmount !== null ? totalAmount : 0,
-    trend: totalTrendDirection,
-    trendValue: totalTrend !== null ? totalTrend : 0,
-  },
-  {
-    icon: ReceiptText,
-    title: 'Средний чек',
-    bottomLeftValue: 842,
-    trend: 'down' as const,
-    trendValue: 3.2
-  },
-  {
-    icon: ShoppingCart,
-    title: 'Количество заказанных товаров',
-    bottomLeftValue: 3500,
-    trend: 'up' as const,
-    trendValue: 8.1
-  }
-]
+  const stats = [
+    {
+      icon: Wallet,
+      title: 'Заказали на сумму',
+      bottomLeftValue: totalAmount !== null ? totalAmount : 0,
+      trend: totalTrendDirection,
+      trendValue: totalTrend !== null ? totalTrend : 0,
+    },
+    {
+      icon: ReceiptText,
+      title: 'Средний чек',
+      bottomLeftValue: averageAmount !== null ? averageAmount : 0,
+      trend: averageTrendDirection,
+      trendValue: averageTrend !== null ? averageTrend : 0
+    },
+    {
+      icon: ShoppingCart,
+      title: 'Количество заказанных товаров',
+      bottomLeftValue: 3500,
+      trend: 'up' as const,
+      trendValue: 8.1
+    }
+  ]
 
-export default function Dashboard() {
   return (
     <main className="flex justify-center gap-6">
       {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
