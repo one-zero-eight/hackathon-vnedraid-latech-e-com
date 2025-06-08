@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel, ConfigDict
 
 from src.db.models import ProductStatus
-from src.schemas.brand import BrandRead
-from src.schemas.category import CategoryRead
-from src.schemas.comment import CommentRead
-from src.schemas.item import ItemInRead, ItemOutRead
+
+if TYPE_CHECKING:
+    from src.schemas.brand import BrandRead
+    from src.schemas.category import CategoryRead
+    from src.schemas.comment import CommentRead
+    from src.schemas.item import ItemInRead, ItemOutRead
 
 
 class ProductRead(BaseModel):
