@@ -19,25 +19,21 @@ export interface AuthFormField {
   type?: string
 }
 
-export enum ProductStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  DRAFT = 'DRAFT'
-}
+export type ProductStatus = 'active' | 'inactive' | 'under_moderation'
 
 export interface BrandRead {
-  id: string
+  id: number
   name: string
-  seller_id: string
+  seller_id: number
 }
 
 export interface CategoryRead {
-  id: string
+  id: number
   name: string
 }
 
 export interface Product {
-  id: string
+  id: number
   name: string
   price: number
   discount_price: number
@@ -56,4 +52,20 @@ export interface Product {
   // comments: CommentRead[]
   // items_in: ItemInRead[]
   // items_out: ItemOutRead[]
+}
+
+export interface ProductUpdate {
+  name?: string
+  price?: number
+  discount_price?: number
+  img_url?: string
+  count?: number
+  description?: string
+  size_width?: number
+  size_height?: number
+  size_depth?: number
+  lamoda_sku?: string
+  status?: ProductStatus
+  brand_id?: number
+  category_id?: number
 }

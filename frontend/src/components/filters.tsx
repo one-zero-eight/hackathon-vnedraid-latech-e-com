@@ -14,31 +14,34 @@ import { ProductStatus } from '@/lib/types'
 interface NumberFilterProps {
   value: { from?: number; to?: number }
   onChange: (value: { from?: number; to?: number }) => void
-  placeholder?: string
 }
 
-export function NumberFilter({ value = {}, onChange, placeholder }: NumberFilterProps) {
+export function NumberFilter({ value, onChange }: NumberFilterProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Input
+    <div className="flex gap-2">
+      <input
         type="number"
+        value={value.from || ''}
+        onChange={(e) =>
+          onChange({
+            ...value,
+            from: e.target.value ? Number(e.target.value) : undefined
+          })
+        }
         placeholder="От"
-        value={value.from ?? ''}
-        onChange={(e) => {
-          const newValue = e.target.value ? Number(e.target.value) : undefined
-          onChange({ ...value, from: newValue })
-        }}
-        className="w-24"
+        className="border-input bg-background w-20 rounded-md border px-2 py-1 text-sm"
       />
-      <Input
+      <input
         type="number"
+        value={value.to || ''}
+        onChange={(e) =>
+          onChange({
+            ...value,
+            to: e.target.value ? Number(e.target.value) : undefined
+          })
+        }
         placeholder="До"
-        value={value.to ?? ''}
-        onChange={(e) => {
-          const newValue = e.target.value ? Number(e.target.value) : undefined
-          onChange({ ...value, to: newValue })
-        }}
-        className="w-24"
+        className="border-input bg-background w-20 rounded-md border px-2 py-1 text-sm"
       />
     </div>
   )
@@ -69,26 +72,14 @@ interface StatusFilterProps {
 
 export function StatusFilter({ value, onChange }: StatusFilterProps) {
   return (
-    <Select
-      value={value ?? 'all'}
-      onValueChange={(newValue) =>
-        onChange(newValue === 'all' ? undefined : (newValue as ProductStatus))
-      }
-    >
-      <SelectTrigger className="w-full">
+    <Select value={value} onValueChange={(value) => onChange(value as ProductStatus)}>
+      <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Выберите статус" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">Все</SelectItem>
-        {Object.values(ProductStatus).map((status) => (
-          <SelectItem key={status} value={status}>
-            {status === ProductStatus.ACTIVE
-              ? 'Активный'
-              : status === ProductStatus.INACTIVE
-                ? 'Неактивный'
-                : 'Черновик'}
-          </SelectItem>
-        ))}
+        <SelectItem value="active">Активный</SelectItem>
+        <SelectItem value="inactive">Неактивный</SelectItem>
+        <SelectItem value="under_moderation">На модерации</SelectItem>
       </SelectContent>
     </Select>
   )
