@@ -35,15 +35,9 @@ class Product(Base, IdMixin):
     size_height: Mapped[int] = mapped_column(nullable=True)
     size_depth: Mapped[int] = mapped_column(nullable=True)
     lamoda_sku: Mapped[str] = mapped_column(nullable=True)
-    status: Mapped[ProductStatus] = mapped_column(
-        default=ProductStatus.INACTIVE
-    )
-    brand_id: Mapped[int] = mapped_column(
-        ForeignKey("brand.id", ondelete="CASCADE")
-    )
-    category_id: Mapped[int] = mapped_column(
-        ForeignKey("category.id", ondelete="CASCADE")
-    )
+    status: Mapped[ProductStatus] = mapped_column(default=ProductStatus.INACTIVE)
+    brand_id: Mapped[int] = mapped_column(ForeignKey("brand.id", ondelete="CASCADE"))
+    category_id: Mapped[int] = mapped_column(ForeignKey("category.id", ondelete="CASCADE"))
 
     brand: Mapped["Brand"] = relationship(
         "Brand",

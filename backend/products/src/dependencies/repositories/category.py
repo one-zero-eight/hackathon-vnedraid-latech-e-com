@@ -8,7 +8,5 @@ class CategoryRepositoryProvider(Provider):
     scope = Scope.REQUEST
 
     @provide
-    async def get_category_repository(
-        self, session: AsyncSession
-    ) -> CategoryRepository:
+    async def get_category_repository(self, session: AsyncSession) -> CategoryRepository:
         return CategoryRepository(session)

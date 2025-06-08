@@ -11,15 +11,11 @@ class BrandRepository:
         self.session = session
 
     async def get_by_id(self, id: int) -> Brand | None:
-        result = await self.session.execute(
-            select(Brand).where(Brand.id == id)
-        )
+        result = await self.session.execute(select(Brand).where(Brand.id == id))
         return result.scalar_one_or_none()
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Brand]:
-        result = await self.session.execute(
-            select(Brand).offset(skip).limit(limit)
-        )
+        result = await self.session.execute(select(Brand).offset(skip).limit(limit))
         return result.scalars().all()
 
     async def create(self, data: BrandCreate) -> Brand:
@@ -32,9 +28,7 @@ class BrandRepository:
     async def update(self, id: int, data: BrandUpdate) -> Brand | None:
         update_data = data.model_dump(exclude_unset=True)
         if update_data:
-            await self.session.execute(
-                update(Brand).where(Brand.id == id).values(**update_data)
-            )
+            await self.session.execute(update(Brand).where(Brand.id == id).values(**update_data))
             await self.session.commit()
         return await self.get_by_id(id)
 
@@ -48,15 +42,9 @@ class BrandRepository:
         return item
 
     async def get_by_name(self, name: str) -> Brand | None:
-        result = await self.session.execute(
-            select(Brand).where(Brand.name == name)
-        )
+        result = await self.session.execute(select(Brand).where(Brand.name == name))
         return result.scalar_one_or_none()
 
     async def get_with_products(self, id: int) -> Brand | None:
-        result = await self.session.execute(
-            select(Brand)
-            .options(joinedload(Brand.products))
-            .where(Brand.id == id)
-        )
+        result = await self.session.execute(select(Brand).options(joinedload(Brand.products)).where(Brand.id == id))
         return result.scalar_one_or_none()

@@ -41,3 +41,32 @@ export const refreshAccessToken = async () => {
   setToken(data.access_token, refreshToken) // reuse old refresh token or use new one if returned
   return data.access_token
 }
+
+export async function getUserIdFromToken(token: string): Promise<string | null> {
+  try {
+    const response = await fetch('/users/me', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      console.error(`Failed to fetch user info: ${response.status}`)
+      return null
+    }
+
+    const data = await response.json()
+
+    if (data && data.id) {
+      return data.id
+    } else {
+      console.warn('No id field in response')
+      return null
+    }
+  } catch (error) {
+    console.error('Error fetching user info:', error)
+    return null
+  }
+}

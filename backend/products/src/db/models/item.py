@@ -17,9 +17,7 @@ class ItemIn(Base, IdMixin):
 
     product_id: Mapped[int] = mapped_column(ForeignKey("product.id"))
     count: Mapped[int] = mapped_column(default=0)
-    added: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.UTC)
-    )
+    added: Mapped[datetime.datetime] = mapped_column(default=lambda: datetime.datetime.now(datetime.UTC))
 
     product: Mapped["Product"] = relationship(
         "Product",
