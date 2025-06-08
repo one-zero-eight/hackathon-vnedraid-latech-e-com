@@ -27,27 +27,26 @@ export async function getUserIdFromToken(token: string): Promise<string | null> 
     const response = await fetch('/users/me', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
 
     if (!response.ok) {
-      console.error(`Failed to fetch user info: ${response.status}`);
-      return null;
+      console.error(`Failed to fetch user info: ${response.status}`)
+      return null
     }
 
-    const data = await response.json();
+    const data = await response.json()
 
     if (data && data.id) {
-      return data.id;
+      return data.id
     } else {
-      console.warn('No id field in response');
-      return null;
+      console.warn('No id field in response')
+      return null
     }
-
   } catch (error) {
-    console.error('Error fetching user info:', error);
-    return null;
+    console.error('Error fetching user info:', error)
+    return null
   }
 }
