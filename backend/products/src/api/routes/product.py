@@ -91,10 +91,10 @@ async def update_product(
     return product
 
 
-@product_router.patch("/batch")
+@product_router.patch("/batch", response_model=list[ProductRead])
 async def update_product_batch(
-        products_data: list[ProductUpdate], repo_manager: RepositoryManager = Depends(get_repository_manager)
-) -> list[ProductUpdate]:
+    products_data: list[ProductUpdate], repo_manager: RepositoryManager = Depends(get_repository_manager)
+):
     result = []
     for product in products_data:
         product = await repo_manager.product.update(product)
@@ -118,8 +118,5 @@ async def update_product_stock(
 async def delete_product(product_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)):
     product = await repo_manager.product.delete(product_id)
     if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     return product

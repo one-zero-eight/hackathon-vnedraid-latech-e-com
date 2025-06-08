@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
+from schemas import ProductRead
 from src.db.repositories import RepositoryManager, get_repository_manager
 from src.schemas import BrandCreate, BrandRead, BrandUpdate
 
 brand_router = APIRouter(prefix="/brands", tags=["brands"])
 
 
-@brand_router.get("/")
+@brand_router.get("/", response_model=list[BrandRead])
 async def get_brands(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -16,7 +17,7 @@ async def get_brands(
     return await repo_manager.brand.get_all(skip=skip, limit=limit)
 
 
-@brand_router.get("/{brand_id}")
+@brand_router.get("/{brand_id}", response_model=BrandRead)
 async def get_brand(brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)) -> BrandRead:
     brand = await repo_manager.brand.get_by_id(brand_id)
     if not brand:
@@ -24,7 +25,7 @@ async def get_brand(brand_id: int, repo_manager: RepositoryManager = Depends(get
     return brand
 
 
-@brand_router.get("/name/{brand_name}")
+@brand_router.get("/name/{brand_name}", response_model=BrandRead)
 async def get_brand_by_name(
     brand_name: str, repo_manager: RepositoryManager = Depends(get_repository_manager)
 ) -> BrandRead:
@@ -34,7 +35,7 @@ async def get_brand_by_name(
     return brand
 
 
-@brand_router.get("/{brand_id}/with-products")
+@brand_router.get("/{brand_id}/with-products", response_model=ProductRead)
 async def get_brand_with_products(
     brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)
 ) -> BrandRead:
@@ -44,14 +45,14 @@ async def get_brand_with_products(
     return brand
 
 
-@brand_router.post("/", status_code=status.HTTP_201_CREATED)
+@brand_router.post("/", response_model=BrandRead, status_code=status.HTTP_201_CREATED)
 async def create_brand(
     brand_data: BrandCreate, repo_manager: RepositoryManager = Depends(get_repository_manager)
 ) -> BrandRead:
     return await repo_manager.brand.create(brand_data)
 
 
-@brand_router.patch("/{brand_id}")
+@brand_router.patch("/{brand_id}", response_model=BrandRead)
 async def update_brand(
     brand_id: int, brand_data: BrandUpdate, repo_manager: RepositoryManager = Depends(get_repository_manager)
 ) -> BrandRead:
@@ -61,7 +62,7 @@ async def update_brand(
     return brand
 
 
-@brand_router.delete("/{brand_id}")
+@brand_router.delete("/{brand_id}", response_model=BrandRead)
 async def delete_brand(brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)) -> BrandRead:
     brand = await repo_manager.brand.delete(brand_id)
     if not brand:
