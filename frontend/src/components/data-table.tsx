@@ -65,9 +65,9 @@ type Filters = {
 
 export function DataTable({ onEdit, onDelete }: DataTableProps) {
   const [data, setData] = useState<Product[]>([])
-  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [editingCell, setEditingCell] = useState<{
-    id: string
+    id: number
     field: keyof Product
   } | null>(null)
   const [filters, setFilters] = useState<Filters>({})
@@ -100,7 +100,7 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
     fetchProducts()
   }, [])
 
-  const handleRowSelect = (id: string) => {
+  const handleRowSelect = (id: number) => {
     const newSelected = new Set(selectedRows)
     if (newSelected.has(id)) {
       newSelected.delete(id)
@@ -110,13 +110,13 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
     setSelectedRows(newSelected)
   }
 
-  const handleCellEdit = (id: string, field: keyof Product) => {
+  const handleCellEdit = (id: number, field: keyof Product) => {
     setEditingCell({ id, field })
     setIsEditing(true)
   }
 
-  const handleCellSave = (id: string, field: keyof Product, value: any) => {
-    const originalValue = data.find((item) => item.lamoda_sku === id)?.[field]
+  const handleCellSave = (id: number, field: keyof Product, value: any) => {
+    const originalValue = data.find((item) => item.id === id)?.[field]
     if (value !== originalValue) {
       setModifiedCells((prev) => {
         const newMap = new Map(prev)
@@ -130,9 +130,10 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
   const handleSaveChanges = async () => {
     try {
       const updates = Array.from(modifiedCells.entries()).map(([key, { field, value }]) => {
-        const [lamodaSku] = key.split('-')
-        const product = data.find((p) => p.lamoda_sku === lamodaSku)
-        if (!product) throw new Error(`Product not found: ${lamodaSku}`)
+        const [idStr] = key.split('-')
+        const id = parseInt(idStr, 10)
+        const product = data.find((p) => p.id === id)
+        if (!product) throw new Error(`Product not found: ${id}`)
 
         const updateData: ProductUpdate = {}
         if (field === 'name') updateData.name = value
@@ -141,15 +142,15 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
 
         return {
           id: product.id,
-          data: updateData
+          ...updateData
         }
       })
 
       if (updates.length === 1) {
         // Single update
-        const { id, data: updateData } = updates[0]
-        const updatedProduct = await productApi.updateProduct(id, updateData)
-        setData((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)))
+        const updateData = updates[0]
+        const updatedProduct = await productApi.updateProduct(updateData)
+        setData((prev) => prev.map((p) => (p.id === updateData.id ? updatedProduct : p)))
       } else {
         // Batch update
         const updatedProducts = await productApi.updateProductsBatch(updates)
@@ -176,13 +177,13 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
     setEditingCell(null)
   }
 
-  const handleDelete = async (lamodaSku: string) => {
+  const handleDelete = async (id: number) => {
     try {
-      const product = data.find((p) => p.lamoda_sku === lamodaSku)
-      if (!product) throw new Error(`Product not found: ${lamodaSku}`)
+      const product = data.find((p) => p.id === id)
+      if (!product) throw new Error(`Product not found: ${id}`)
 
       await productApi.deleteProduct(product.id)
-      setData((prev) => prev.filter((p) => p.lamoda_sku !== lamodaSku))
+      setData((prev) => prev.filter((p) => p.id !== id))
       toast.success('Product deleted successfully')
     } catch (error) {
       console.error('Error deleting product:', error)
@@ -229,7 +230,7 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
             return itemValue >= from && itemValue <= to
           }
           if (from !== undefined) {
-            return itemValue === from
+            return itemValue >= from
           }
           if (to !== undefined) {
             return itemValue <= to
@@ -294,7 +295,7 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
                   checked={selectedRows.size === filteredData.length}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedRows(new Set(filteredData.map((item) => item.lamoda_sku)))
+                      setSelectedRows(new Set(filteredData.map((item) => item.id)))
                     } else {
                       setSelectedRows(new Set())
                     }
@@ -324,7 +325,11 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
                       ) : typeof data[0]?.[field] === 'number' ? (
                         activeNumericFilter === field && (
                           <NumberFilter
-                            value={filters[field] as { from?: number; to?: number }}
+                            value={
+                              typeof filters[field] === 'object' && filters[field] !== null
+                                ? (filters[field] as { from?: number; to?: number })
+                                : {}
+                            }
                             onChange={(value) => handleFilterChange(field, value)}
                           />
                         )
@@ -340,19 +345,18 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
           </TableHeader>
           <TableBody>
             {filteredData.map((row) => (
-              <TableRow key={row.lamoda_sku}>
+              <TableRow key={row.id}>
                 <TableCell>
                   <Checkbox
-                    checked={selectedRows.has(row.lamoda_sku)}
-                    onCheckedChange={() => handleRowSelect(row.lamoda_sku)}
+                    checked={selectedRows.has(row.id)}
+                    onCheckedChange={() => handleRowSelect(row.id)}
                   />
                 </TableCell>
-                {Object.entries(row).map(([key, value]) => {
+                {Object.keys(columnLabels).map((key) => {
                   const field = key as keyof Product
-                  const isEditing =
-                    editingCell?.id === row.lamoda_sku && editingCell?.field === field
-                  const modifiedCell = modifiedCells.get(`${row.lamoda_sku}-${field}`)
-                  const displayValue = modifiedCell ? modifiedCell.value : value
+                  const isEditing = editingCell?.id === row.id && editingCell?.field === field
+                  const modifiedCell = modifiedCells.get(`${row.id}-${field}`)
+                  const displayValue = modifiedCell ? modifiedCell.value : row[field]
 
                   return (
                     <TableCell key={key}>
@@ -360,10 +364,10 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
                         <Input
                           type={field === 'name' ? 'string' : 'number'}
                           defaultValue={displayValue as string | number}
-                          onBlur={(e) => handleCellSave(row.lamoda_sku, field, e.target.value)}
+                          onBlur={(e) => handleCellSave(row.id, field, e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                              handleCellSave(row.lamoda_sku, field, e.currentTarget.value)
+                              handleCellSave(row.id, field, e.currentTarget.value)
                             }
                           }}
                           autoFocus
@@ -372,21 +376,37 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
                         <div
                           className={`${editableFields.includes(field) ? 'cursor-pointer' : ''} ${modifiedCell ? 'font-medium text-blue-600' : ''}`}
                           onClick={() =>
-                            editableFields.includes(field) && handleCellEdit(row.lamoda_sku, field)
+                            editableFields.includes(field) && handleCellEdit(row.id, field)
                           }
                         >
                           {field === 'img_url' ? (
-                            <img
-                              src={displayValue as string}
-                              alt={row.name}
-                              className="h-10 w-10 object-cover"
-                            />
+                            displayValue ? (
+                              <img
+                                src={displayValue as string}
+                                alt={row.name || 'Product image'}
+                                className="h-10 w-10 object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-10 w-10 items-center justify-center bg-gray-200">
+                                <span className="text-gray-400">No image</span>
+                              </div>
+                            )
                           ) : field === 'brand' ? (
-                            (displayValue as BrandRead).name
+                            displayValue ? (
+                              (displayValue as BrandRead).name
+                            ) : (
+                              '-'
+                            )
                           ) : field === 'category' ? (
-                            (displayValue as CategoryRead).name
+                            displayValue ? (
+                              (displayValue as CategoryRead).name
+                            ) : (
+                              '-'
+                            )
+                          ) : displayValue === null || displayValue === undefined ? (
+                            '-'
                           ) : (
-                            displayValue
+                            String(displayValue)
                           )}
                         </div>
                       )}
@@ -401,7 +421,7 @@ export function DataTable({ onEdit, onDelete }: DataTableProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleDelete(row.lamoda_sku)}>
+                      <DropdownMenuItem onClick={() => handleDelete(row.id)}>
                         Удалить
                       </DropdownMenuItem>
                     </DropdownMenuContent>

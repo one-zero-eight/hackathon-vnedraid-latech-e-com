@@ -2,6 +2,13 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { ProductStatus } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -57,6 +64,10 @@ export default function CreateProduct() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleStatusChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, status: value as ProductStatus }))
   }
 
   return (
@@ -162,6 +173,20 @@ export default function CreateProduct() {
             onChange={handleChange}
             required
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select value={formData.status} onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="under_moderation">Under Moderation</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

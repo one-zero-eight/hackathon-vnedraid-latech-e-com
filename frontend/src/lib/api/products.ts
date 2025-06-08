@@ -13,38 +13,25 @@ export const productApi = {
   },
 
   // Update a single product
-  updateProduct: async (productId: number, data: ProductUpdate): Promise<Product> => {
-    const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+  updateProduct: async (data: ProductUpdate): Promise<Product> => {
+    const response = await fetch(`${API_BASE_URL}/products/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     })
-    if (!response.ok) {
-      throw new Error('Failed to update product')
-    }
+    if (!response.ok) throw new Error('Failed to update product')
     return response.json()
   },
 
-  // Update multiple products in batch
-  updateProductsBatch: async (
-    updates: Array<{ id: number; data: ProductUpdate }>
-  ): Promise<Product[]> => {
-    const promises = updates.map(({ id, data }) =>
-      fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      }).then((res) => {
-        if (!res.ok) throw new Error(`Failed to update product ${id}`)
-        return res.json()
-      })
-    )
-
-    return Promise.all(promises)
+  // Update multiple products in batch (use /products/batch)
+  updateProductsBatch: async (updates: Array<ProductUpdate>): Promise<Product[]> => {
+    const response = await fetch(`${API_BASE_URL}/products/batch`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    })
+    if (!response.ok) throw new Error('Failed to update products batch')
+    return response.json()
   },
 
   // Delete a product
