@@ -25,7 +25,9 @@ async def get_brand(brand_id: int, repo_manager: RepositoryManager = Depends(get
 
 
 @brand_router.get("/name/{brand_name}")
-async def get_brand_by_name(brand_name: str, repo_manager: RepositoryManager = Depends(get_repository_manager)) -> BrandRead:
+async def get_brand_by_name(
+    brand_name: str, repo_manager: RepositoryManager = Depends(get_repository_manager)
+) -> BrandRead:
     brand = await repo_manager.brand.get_by_name(brand_name)
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
@@ -33,7 +35,9 @@ async def get_brand_by_name(brand_name: str, repo_manager: RepositoryManager = D
 
 
 @brand_router.get("/{brand_id}/with-products")
-async def get_brand_with_products(brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)) -> BrandRead:
+async def get_brand_with_products(
+    brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)
+) -> BrandRead:
     brand = await repo_manager.brand.get_with_products(brand_id)
     if not brand:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
@@ -41,11 +45,13 @@ async def get_brand_with_products(brand_id: int, repo_manager: RepositoryManager
 
 
 @brand_router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_brand(brand_data: BrandCreate, repo_manager: RepositoryManager = Depends(get_repository_manager)) -> BrandRead:
+async def create_brand(
+    brand_data: BrandCreate, repo_manager: RepositoryManager = Depends(get_repository_manager)
+) -> BrandRead:
     return await repo_manager.brand.create(brand_data)
 
 
-@brand_router.put("/{brand_id}")
+@brand_router.patch("/{brand_id}")
 async def update_brand(
     brand_id: int, brand_data: BrandUpdate, repo_manager: RepositoryManager = Depends(get_repository_manager)
 ) -> BrandRead:
