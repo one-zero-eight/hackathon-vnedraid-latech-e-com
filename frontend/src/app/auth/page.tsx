@@ -111,7 +111,6 @@ export default function AuthPage() {
       <div key={id} className="space-y-2">
         <Label htmlFor={id}>{label}</Label>
         <Input
-          readOnly={id === 'bank_name'}
           id={id}
           name={id}
           type={numericFields.includes(id) ? 'text' : type}
