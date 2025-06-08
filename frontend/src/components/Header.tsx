@@ -6,12 +6,12 @@ import logo from '../../public/assets/logo.svg'
 
 const actions = [
   {
-    label: 'Заказы',
-    href: '#'
-  },
-  {
     label: 'Товары',
     href: '/'
+  },
+  {
+    label: 'Заказы',
+    href: '/orders'
   },
   {
     label: 'Аналитика',

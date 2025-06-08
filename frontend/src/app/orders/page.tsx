@@ -1,51 +1,194 @@
 'use client'
+import { getOrders } from '@/lib/hooks/useOrders'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 
-type OrderStatus = 'Новый заказ' | 'В доставке' | 'Доставлен'
+type OrderStatus = 'Новый заказ' | 'В обработке' | 'В пути' | 'Доставлен' | 'Отменен'
 
 interface Order {
+  // Basic order info
   id: string
   ordererName: string
+  customerId: string
+  email: string
+  phoneNumber: string
+
+  // Product details
+  productId: string
   productName: string
-  price: number
+  productCategory: string
+  brand: string
+  size: string
+  color: string
+  material: string
+  quantity: number
+  originalPrice: number
+  discountApplied?: number
+  finalPrice: number
+  season: string
+
+  // Dates
+  orderDate: string
+  estimatedDeliveryDate: string
+  actualDeliveryDate?: string
+
+  // Delivery info
   deliveryPlace: string
+  shippingMethod: string
+  shippingCost: number
+  trackingNumber: string
+  carrier: string
+
+  // Payment info
+  paymentMethod: string
+  paymentStatus: 'Paid' | 'Pending' | 'Refunded' | 'Failed'
+
+  // Order status
   status: OrderStatus
+  returnPolicy: string
+  careInstructions: string
+
+  // Additional info
+  customerNotes?: string
+  customerReview?: string
+  reviewComment?: string
+  salesChannel: string
+  isGift: boolean
+  giftMessage?: string
 }
 
 // Mock data for demonstration
-const mockOrders: Order[] = [
+const mockClothingOrders: Order[] = [
   {
-    id: 'ORD-001',
-    ordererName: 'Иван Петров',
-    productName: 'Смартфон iPhone 15 Pro',
-    price: 129990,
-    deliveryPlace: 'ул. Ленина, 10, кв. 5, Москва',
-    status: 'Новый заказ'
+    id: 'CLTH-001',
+    ordererName: 'Екатерина Соколова',
+    customerId: 'CUST-67890',
+    email: 'ekaterina.s@example.com',
+    phoneNumber: '+79167778899',
+
+    productId: 'DRE-2023-BL',
+    productName: 'Вечернее платье "Элегант"',
+    productCategory: 'Платья',
+    brand: 'Moda Bella',
+    size: '42 (INT) / M',
+    color: 'Синий',
+    material: 'Шелк с кружевом',
+    quantity: 1,
+    originalPrice: 15990,
+    discountApplied: 2000,
+    finalPrice: 13990,
+    season: 'Осень-Зима 2023',
+
+    orderDate: '2023-11-05T10:15:00Z',
+    estimatedDeliveryDate: '2023-11-12',
+
+    deliveryPlace: 'ул. Пушкина, 15, кв. 7, Москва',
+    shippingMethod: 'Стандарт',
+    shippingCost: 490,
+    trackingNumber: 'RU456789012',
+    carrier: 'Почта России',
+
+    paymentMethod: 'СБП',
+    paymentStatus: 'Paid',
+
+    status: 'В обработке',
+    returnPolicy: '30 дней',
+    careInstructions: 'Химчистка',
+    customerNotes: 'Позвонить перед доставкой',
+
+    salesChannel: 'Instagram',
+    isGift: true,
+    giftMessage: 'С Днем Рождения!'
   },
   {
-    id: 'ORD-002',
-    ordererName: 'Мария Иванова',
-    productName: 'Ноутбук MacBook Air',
-    price: 149990,
-    deliveryPlace: 'пр. Мира, 25, кв. 12, Санкт-Петербург',
-    status: 'В доставке'
+    id: 'CLTH-002',
+    ordererName: 'Дмитрий Волков',
+    customerId: 'CUST-54321',
+    email: 'dmitry.v@example.com',
+    phoneNumber: '+79165554433',
+
+    productId: 'JACK-2023-BK',
+    productName: 'Кожаная куртка "Рокер"',
+    productCategory: 'Верхняя одежда',
+    brand: 'Urban Style',
+    size: '50 (INT) / XL',
+    color: 'Черный',
+    material: 'Натуральная кожа',
+    quantity: 1,
+    originalPrice: 34990,
+    finalPrice: 34990,
+    season: 'Всесезонная',
+
+    orderDate: '2023-11-10T18:30:00Z',
+    estimatedDeliveryDate: '2023-11-15',
+
+    deliveryPlace: 'пр. Победы, 33, кв. 124, Санкт-Петербург',
+    shippingMethod: 'Экспресс',
+    shippingCost: 890,
+    trackingNumber: 'RU987654321',
+    carrier: 'CDEK',
+
+    paymentMethod: 'Кредитная карта',
+    paymentStatus: 'Paid',
+
+    status: 'В пути',
+    returnPolicy: '14 дней',
+    careInstructions: 'Протирать влажной тканью',
+
+    salesChannel: 'Мобильное приложение',
+    isGift: false
   },
   {
-    id: 'ORD-003',
-    ordererName: 'Алексей Смирнов',
-    productName: 'Наушники AirPods Pro',
-    price: 24990,
-    deliveryPlace: 'ул. Гагарина, 7, кв. 3, Казань',
-    status: 'Доставлен'
+    id: 'CLTH-003',
+    ordererName: 'Анна Козлова',
+    customerId: 'CUST-98765',
+    email: 'anna.k@example.com',
+    phoneNumber: '+79162223344',
+
+    productId: 'SET-2023-WH',
+    productName: 'Спортивный костюм "Актив"',
+    productCategory: 'Спортивная одежда',
+    brand: 'SportLife',
+    size: '44 (INT) / S',
+    color: 'Белый',
+    material: 'Хлопок с эластаном',
+    quantity: 2,
+    originalPrice: 7990,
+    discountApplied: 1000,
+    finalPrice: 6990,
+    season: 'Весна-Лето 2023',
+
+    orderDate: '2023-11-12T09:45:00Z',
+    estimatedDeliveryDate: '2023-11-18',
+    actualDeliveryDate: '2023-11-17T14:20:00Z',
+
+    deliveryPlace: 'ул. Советская, 5, кв. 9, Казань',
+    shippingMethod: 'Стандарт',
+    shippingCost: 490,
+    trackingNumber: 'RU567890123',
+    carrier: 'Boxberry',
+
+    paymentMethod: 'Яндекс.Деньги',
+    paymentStatus: 'Paid',
+
+    status: 'Доставлен',
+    returnPolicy: '30 дней',
+    careInstructions: 'Машинная стирка 30°C',
+    customerReview: '5 звезд',
+    reviewComment: 'Отличное качество, удобная посадка',
+
+    salesChannel: 'Веб-сайт',
+    isGift: false
   }
 ]
 
 export default function OrdersPage() {
-  const { data: orders = mockOrders, isLoading } = useQuery({
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const { data: orders = mockClothingOrders, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
       // TODO: Replace with actual API call
-      return mockOrders
+      return mockClothingOrders
     }
   })
 
@@ -53,13 +196,22 @@ export default function OrdersPage() {
     switch (status) {
       case 'Новый заказ':
         return 'bg-blue-100 text-blue-800'
-      case 'В доставке':
+      case 'В пути':
         return 'bg-yellow-100 text-yellow-800'
       case 'Доставлен':
         return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  const { data: mock, isFetched } = useQuery({
+    queryKey: ['orders'],
+    queryFn: getOrders
+  })
+
+  if (isFetched) {
+    console.log(mock, 22)
   }
 
   if (isLoading) {
@@ -112,7 +264,7 @@ export default function OrdersPage() {
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Цена</dt>
                     <dd className="mt-1 text-sm font-semibold text-gray-900">
-                      {order.price.toLocaleString('ru-RU')} ₽
+                      {order.finalPrice.toLocaleString('ru-RU')} ₽
                     </dd>
                   </div>
 
@@ -125,6 +277,7 @@ export default function OrdersPage() {
                 <div className="mt-4 flex justify-end space-x-3">
                   <button
                     type="button"
+                    onClick={() => setSelectedOrder(order)}
                     className="inline-flex items-center rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:ring-2 focus:ring-black focus:ring-offset-2 focus:outline-none"
                   >
                     Подробнее
@@ -135,6 +288,213 @@ export default function OrdersPage() {
           ))}
         </div>
       </div>
+
+      {/* Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div
+              className="bg-opacity-75 fixed inset-0 bg-gray-500 transition-opacity"
+              onClick={() => setSelectedOrder(null)}
+            />
+
+            <div className="relative w-full max-w-3xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
+              <div className="max-h-[90vh] overflow-y-auto">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+                  <div className="flex items-center justify-between border-b pb-4">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Детали заказа {selectedOrder.id}
+                    </h3>
+                    <button
+                      onClick={() => setSelectedOrder(null)}
+                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none"
+                    >
+                      <span className="sr-only">Закрыть</span>
+                      <svg
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-6">
+                    {/* Основная информация */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">
+                        Основная информация
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Статус</p>
+                          <p className="font-medium">{selectedOrder.status}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Дата заказа</p>
+                          <p className="font-medium">
+                            {new Date(selectedOrder.orderDate).toLocaleDateString('ru-RU')}
+                          </p>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Информация о клиенте */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">
+                        Информация о клиенте
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Имя</p>
+                          <p className="font-medium">{selectedOrder.ordererName}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Email</p>
+                          <p className="font-medium">{selectedOrder.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Телефон</p>
+                          <p className="font-medium">{selectedOrder.phoneNumber}</p>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Информация о товаре */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">
+                        Информация о товаре
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Название</p>
+                          <p className="font-medium">{selectedOrder.productName}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Бренд</p>
+                          <p className="font-medium">{selectedOrder.brand}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Категория</p>
+                          <p className="font-medium">{selectedOrder.productCategory}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Размер</p>
+                          <p className="font-medium">{selectedOrder.size}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Цвет</p>
+                          <p className="font-medium">{selectedOrder.color}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Материал</p>
+                          <p className="font-medium">{selectedOrder.material}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Количество</p>
+                          <p className="font-medium">{selectedOrder.quantity}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Сезон</p>
+                          <p className="font-medium">{selectedOrder.season}</p>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Цены */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">Цены</h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Итоговая цена</p>
+                          <p className="font-medium">
+                            {selectedOrder.finalPrice.toLocaleString('ru-RU')} ₽
+                          </p>
+                        </div>
+                        {selectedOrder.discountApplied && (
+                          <div>
+                            <p className="text-sm text-gray-500">Скидка</p>
+                            <p className="font-medium">
+                              {selectedOrder.discountApplied.toLocaleString('ru-RU')} ₽
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+
+                    {/* Доставка */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">
+                        Информация о доставке
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Адрес</p>
+                          <p className="font-medium">{selectedOrder.deliveryPlace}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Способ доставки</p>
+                          <p className="font-medium">{selectedOrder.shippingMethod}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Стоимость доставки</p>
+                          <p className="font-medium">
+                            {selectedOrder.shippingCost.toLocaleString('ru-RU')} ₽
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Трек-номер</p>
+                          <p className="font-medium">{selectedOrder.trackingNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Перевозчик</p>
+                          <p className="font-medium">{selectedOrder.carrier}</p>
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Дополнительная информация */}
+                    <section>
+                      <h4 className="mb-3 text-lg font-medium text-gray-900">
+                        Дополнительная информация
+                      </h4>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-gray-500">Способ оплаты</p>
+                          <p className="font-medium">{selectedOrder.paymentMethod}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Статус оплаты</p>
+                          <p className="font-medium">{selectedOrder.paymentStatus}</p>
+                        </div>
+                        {selectedOrder.customerNotes && (
+                          <div>
+                            <p className="text-sm text-gray-500">Примечания клиента</p>
+                            <p className="font-medium">{selectedOrder.customerNotes}</p>
+                          </div>
+                        )}
+                        {selectedOrder.isGift && selectedOrder.giftMessage && (
+                          <div>
+                            <p className="text-sm text-gray-500">Подарочное сообщение</p>
+                            <p className="font-medium">{selectedOrder.giftMessage}</p>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
