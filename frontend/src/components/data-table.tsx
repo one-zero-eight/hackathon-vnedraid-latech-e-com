@@ -17,16 +17,17 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { BrandRead, CategoryRead, Product, ProductStatus } from '@/lib/types'
-import { MoreHorizontal, Settings } from 'lucide-react'
+import { BrandRead, CategoryRead, Product, ProductStatus, ProductUpdate } from '@/lib/types'
+import { productApi } from '@/lib/api/products'
 import { useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { NumberFilter, StatusFilter } from './filters'
+import { toast } from 'sonner'
+import { MoreHorizontal, Settings } from 'lucide-react'
 
 interface DataTableProps {
-  data: Product[]
-  onEdit: (id: string, field: keyof Product, value: any) => void
-  onDelete: (id: string) => void
+  onEdit?: (id: string, field: keyof Product, value: any) => void
+  onDelete?: (id: string) => void
 }
 
 const columnLabels: Record<keyof Product, string> = {
@@ -62,19 +63,42 @@ type Filters = {
         : string
 }
 
-export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
-  const [selectedRows, setSelectedRows] = React.useState<Set<string>>(new Set())
-  const [editingCell, setEditingCell] = React.useState<{
+export function DataTable({ onEdit, onDelete }: DataTableProps) {
+  const [data, setData] = useState<Product[]>([])
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
+  const [editingCell, setEditingCell] = useState<{
     id: string
     field: keyof Product
   } | null>(null)
-  const [filters, setFilters] = React.useState<Filters>({})
-  const [globalSearch, setGlobalSearch] = React.useState('')
-  const [activeNumericFilter, setActiveNumericFilter] = React.useState<keyof Product | null>(null)
-  const [modifiedCells, setModifiedCells] = React.useState<
+  const [filters, setFilters] = useState<Filters>({})
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [activeNumericFilter, setActiveNumericFilter] = useState<keyof Product | null>(null)
+  const [modifiedCells, setModifiedCells] = useState<
     Map<string, { field: keyof Product; value: any; originalValue: any }>
   >(new Map())
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch products on component mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const products = await productApi.getProducts()
+        setData(products)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        setError('Failed to fetch products')
+        toast.error('Failed to fetch products')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const handleRowSelect = (id: string) => {
     const newSelected = new Set(selectedRows)
@@ -103,13 +127,47 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
     setEditingCell(null)
   }
 
-  const handleSaveChanges = () => {
-    modifiedCells.forEach(({ field, value }, key) => {
-      const [id] = key.split('-')
-      onEdit(id, field, value)
-    })
-    setModifiedCells(new Map())
-    setIsEditing(false)
+  const handleSaveChanges = async () => {
+    try {
+      const updates = Array.from(modifiedCells.entries()).map(([key, { field, value }]) => {
+        const [lamodaSku] = key.split('-')
+        const product = data.find((p) => p.lamoda_sku === lamodaSku)
+        if (!product) throw new Error(`Product not found: ${lamodaSku}`)
+
+        const updateData: ProductUpdate = {}
+        if (field === 'name') updateData.name = value
+        else if (field === 'price') updateData.price = Number(value)
+        else if (field === 'discount_price') updateData.discount_price = Number(value)
+
+        return {
+          id: product.id,
+          data: updateData
+        }
+      })
+
+      if (updates.length === 1) {
+        // Single update
+        const { id, data: updateData } = updates[0]
+        const updatedProduct = await productApi.updateProduct(id, updateData)
+        setData((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)))
+      } else {
+        // Batch update
+        const updatedProducts = await productApi.updateProductsBatch(updates)
+        setData((prev) =>
+          prev.map((p) => {
+            const updated = updatedProducts.find((up) => up.id === p.id)
+            return updated || p
+          })
+        )
+      }
+
+      setModifiedCells(new Map())
+      setIsEditing(false)
+      toast.success('Changes saved successfully')
+    } catch (error) {
+      console.error('Error saving changes:', error)
+      toast.error('Failed to save changes')
+    }
   }
 
   const handleCancelChanges = () => {
@@ -118,15 +176,34 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
     setEditingCell(null)
   }
 
+  const handleDelete = async (lamodaSku: string) => {
+    try {
+      const product = data.find((p) => p.lamoda_sku === lamodaSku)
+      if (!product) throw new Error(`Product not found: ${lamodaSku}`)
+
+      await productApi.deleteProduct(product.id)
+      setData((prev) => prev.filter((p) => p.lamoda_sku !== lamodaSku))
+      toast.success('Product deleted successfully')
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      toast.error('Failed to delete product')
+    }
+  }
+
   const handleFilterChange = <K extends keyof Product>(field: K, value: Filters[K]) => {
     setFilters((prev) => ({ ...prev, [field]: value }))
   }
 
   const filteredData = React.useMemo(() => {
+    if (!data) return []
+
     return data.filter((item) => {
+      if (!item) return false
+
       if (globalSearch) {
         const searchLower = globalSearch.toLowerCase()
         const hasTextMatch = Object.entries(item).some(([key, value]) => {
+          if (!value) return false
           if (key === 'img_url') return false
           if (key === 'brand' || key === 'category') {
             return (value as BrandRead | CategoryRead).name.toLowerCase().includes(searchLower)
@@ -140,10 +217,11 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
       }
 
       return Object.entries(filters).every(([key, value]) => {
+        if (!value) return true
+
         const field = key as keyof Product
         const itemValue = item[field]
-
-        if (value === undefined || value === '') return true
+        if (!itemValue) return false
 
         if (typeof value === 'object' && 'from' in value) {
           const { from, to } = value
@@ -176,6 +254,19 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
 
   const editableFields: (keyof Product)[] = ['name', 'price', 'discount_price']
   const redirect = useRouter()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  if (!data || data.length === 0) {
+    return <div>No products found</div>
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
@@ -191,7 +282,6 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
             redirect.push('/create')
           }}
         >
-          {' '}
           Создать товар
         </Button>
       </div>
@@ -311,7 +401,7 @@ export function DataTable({ data, onEdit, onDelete }: DataTableProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onDelete(row.lamoda_sku)}>
+                      <DropdownMenuItem onClick={() => handleDelete(row.lamoda_sku)}>
                         Удалить
                       </DropdownMenuItem>
                     </DropdownMenuContent>
