@@ -69,3 +69,57 @@ export interface ProductUpdate {
   brand_id?: number
   category_id?: number
 }
+
+export type OrderStatus = 'Новый заказ' | 'В обработке' | 'В пути' | 'Доставлен' | 'Отменен'
+
+export interface Order {
+  // Basic order info
+  id: string
+  ordererName: string
+  customerId: string
+  email: string
+  phoneNumber: string
+
+  // Product details
+  productId: string
+  productName: string
+  productCategory: string
+  brand: string
+  size: string
+  color: string
+  material: string
+  quantity: number
+  originalPrice: number
+  discountApplied?: number
+  finalPrice: number
+  season: string
+
+  // Dates
+  orderDate: string
+  estimatedDeliveryDate: string
+  actualDeliveryDate?: string
+
+  // Delivery info
+  deliveryPlace: string
+  shippingMethod: string
+  shippingCost: number
+  trackingNumber: string
+  carrier: string
+
+  // Payment info
+  paymentMethod: string
+  paymentStatus: 'Paid' | 'Pending' | 'Refunded' | 'Failed'
+
+  // Order status
+  status: OrderStatus
+  returnPolicy: string
+  careInstructions: string
+
+  // Additional info
+  customerNotes?: string
+  customerReview?: string
+  reviewComment?: string
+  salesChannel: string
+  isGift: boolean
+  giftMessage?: string
+}
