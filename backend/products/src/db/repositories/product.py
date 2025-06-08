@@ -11,15 +11,11 @@ class ProductRepository:
         self.session = session
 
     async def get(self, id: int) -> Product | None:
-        result = await self.session.execute(
-            select(Product).where(Product.id == id)
-        )
+        result = await self.session.execute(select(Product).where(Product.id == id))
         return result.scalar_one_or_none()
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Product]:
-        result = await self.session.execute(
-            select(Product).offset(skip).limit(limit)
-        )
+        result = await self.session.execute(select(Product).offset(skip).limit(limit))
         return result.scalars().all()
 
     async def create(self, data: ProductCreate) -> Product:
@@ -32,9 +28,7 @@ class ProductRepository:
     async def update(self, id: int, data: ProductUpdate) -> Product | None:
         update_data = data.model_dump(exclude_unset=True)
         if update_data:
-            await self.session.execute(
-                update(Product).where(Product.id == id).values(**update_data)
-            )
+            await self.session.execute(update(Product).where(Product.id == id).values(**update_data))
             await self.session.commit()
         return await self.get(id)
 
@@ -62,21 +56,15 @@ class ProductRepository:
         return result.scalar_one_or_none()
 
     async def get_by_status(self, status: ProductStatus) -> list[Product]:
-        result = await self.session.execute(
-            select(Product).where(Product.status == status)
-        )
+        result = await self.session.execute(select(Product).where(Product.status == status))
         return result.scalars().all()
 
     async def get_by_brand(self, brand_id: int) -> list[Product]:
-        result = await self.session.execute(
-            select(Product).where(Product.brand_id == brand_id)
-        )
+        result = await self.session.execute(select(Product).where(Product.brand_id == brand_id))
         return result.scalars().all()
 
     async def get_by_category(self, category_id: int) -> list[Product]:
-        result = await self.session.execute(
-            select(Product).where(Product.category_id == category_id)
-        )
+        result = await self.session.execute(select(Product).where(Product.category_id == category_id))
         return result.scalars().all()
 
     async def search(
@@ -107,8 +95,6 @@ class ProductRepository:
         return result.scalars().all()
 
     async def update_stock(self, product_id: int, count: int) -> Product | None:
-        await self.session.execute(
-            update(Product).where(Product.id == product_id).values(count=count)
-        )
+        await self.session.execute(update(Product).where(Product.id == product_id).values(count=count))
         await self.session.commit()
         return await self.get(product_id)

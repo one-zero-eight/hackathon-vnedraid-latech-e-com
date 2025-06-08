@@ -34,9 +34,7 @@ def get_openapi_schema(app: FastAPI):
     return app.openapi_schema
 
 
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     content = {}
     for item in exc.errors():
         content[item["loc"][1]] = item["msg"]

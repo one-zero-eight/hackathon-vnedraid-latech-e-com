@@ -3,6 +3,7 @@ from decimal import Decimal
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from src.repositories.item import ItemRepository
@@ -26,8 +27,8 @@ async def get_total_income_by_period(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="number of days must be greater than 0",
         )
-    prev_total, cur_total = (
-        await item_repository.get_total_for_current_and_previos_number_of_days(days, seller.seller_id)
+    prev_total, cur_total = await item_repository.get_total_for_current_and_previos_number_of_days(
+        days, seller.seller_id
     )
     diff = abs(prev_total - cur_total)
     if cur_total == 0:
@@ -54,8 +55,8 @@ async def get_total_income_by_period(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="number of days must be greater than 0",
         )
-    prev_average, cur_average = (
-        await item_repository.get_average_for_current_and_previos_number_of_days(days, seller.seller_id)
+    prev_average, cur_average = await item_repository.get_average_for_current_and_previos_number_of_days(
+        days, seller.seller_id
     )
     diff = abs(prev_average - cur_average)
     if cur_average == 0:
@@ -99,3 +100,10 @@ async def get_total_bought_products_by_period(
         previous=prev_count,
         ratio=ratio,
     )
+
+
+@router.get("/categories_with_count/{days:int}")
+async def get_categories_with_count_bought_items(
+    days: int, item_repository: FromDishka[ItemRepository], seller: FromDishka[SellerIdScheme]
+) -> JSONResponse:
+    return await item_repository.get_categories_with_number_of_bought_items(days, seller.seller_id)
