@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
-import { getToken } from '../auth'
+import { getAccessToken, refreshAccessToken } from '../auth'
 
 const registerUser = async (formData: any) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/users/create`, {
@@ -31,13 +31,33 @@ const loginUser = async (formData: { login: string; password: string }) => {
   return res.json() // probably returns JWT
 }
 
-export const getMe = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/users/me`, {
-    method: 'GET',
+export const authFetch = async (
+  url: string,
+  options: RequestInit = {},
+  retry = true
+): Promise<Response> => {
+  let token = getAccessToken()
+
+  const res = await fetch(url, {
+    ...options,
     headers: {
-      Authorization: `Bearer ${getToken()}`
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`
     }
   })
+
+  if (res.status === 401 && retry) {
+    const newToken = await refreshAccessToken()
+    if (!newToken) throw new Error('Session expired. Please login again.')
+
+    return authFetch(url, options, false)
+  }
+
+  return res
+}
+
+export const getMe = async () => {
+  const res = await authFetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/users/me`)
 
   if (!res.ok) {
     throw new Error('Failed to fetch user')

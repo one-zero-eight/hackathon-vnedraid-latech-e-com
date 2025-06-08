@@ -27,7 +27,5 @@ class RepositoryManager:
         await self.session.rollback()
 
 
-async def get_repository_manager(
-    session: AsyncSession = FromDishka[AsyncSession]
-) -> RepositoryManager:
+async def get_repository_manager(session: AsyncSession = FromDishka[AsyncSession]) -> RepositoryManager:
     return RepositoryManager(session)

@@ -4,7 +4,7 @@ from decimal import Decimal
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.models import Brand, ItemOut, Order, Product
+from src.db.models import Brand, ItemOut, Order, Product, Category
 from src.db.models.order import OrderStatus
 
 
@@ -127,3 +127,28 @@ class ItemRepository:
                 result.current if result.current else 0
             )
         return 0, 0
+
+    async def get_categories_with_number_of_bought_items(self, days: int, seller_id: int) -> dict[str, int]:
+        start = date.today() - timedelta(days=days - 1)
+        query = select(
+            Category.name, func.sum(ItemOut.count)
+        ).select_from(
+            ItemOut
+        ).join(
+            Product, Product.id == ItemOut.product_id
+        ).join(Brand, Brand.id == Product.brand_id
+        ).join(Category, Product.category_id == Category.id
+               ).join(
+                   Order, Order.id == ItemOut.order_id
+               ).where(
+            Order.sold_datetime != None,
+            Brand.seller_id == seller_id,
+            Order.status == OrderStatus.COMPLETED,
+            Order.sold_datetime >= start,
+        ).group_by(Category.id)
+        results = await self.session.execute(query)
+        results = results.fetchall()
+        return {
+            item[0]: item[1]
+            for item in results
+        }

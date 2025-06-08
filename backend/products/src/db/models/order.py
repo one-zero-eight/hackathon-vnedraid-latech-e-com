@@ -21,12 +21,8 @@ class OrderStatus(StrEnum):
 class Order(Base, IdMixin):
     __tablename__ = "order"
 
-    status: Mapped[OrderStatus] = mapped_column(
-        default=OrderStatus.PENDING
-    )
-    sold_datetime: Mapped[datetime.datetime] = mapped_column(
-        default=lambda: datetime.datetime.now(datetime.UTC)
-    )
+    status: Mapped[OrderStatus] = mapped_column(default=OrderStatus.PENDING)
+    sold_datetime: Mapped[datetime.datetime] = mapped_column(default=lambda: datetime.datetime.now(datetime.UTC))
 
     order_items: Mapped[list["ItemOut"]] = relationship(
         "ItemOut",
