@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ShoppingCart, Wallet, ReceiptText } from 'lucide-react'
 import StatisticsCard from '@/components/ui/statisticsCard'
-import { getToken } from '@/lib/auth'
+import { getAccessToken } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { getMe } from '@/lib/hooks/useAuth'
 
@@ -26,10 +26,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchData() {
-      const token = getToken()
+      const token = getAccessToken()
 
       if (!token || !user?.id) {
-        console.error('No token or user ID available')
+        console.log('No token or user ID available')
         return
       }
 
