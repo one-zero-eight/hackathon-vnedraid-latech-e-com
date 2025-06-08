@@ -25,12 +25,12 @@ class ProductRepository:
         await self.session.refresh(obj)
         return obj
 
-    async def update(self, id: int, data: ProductUpdate) -> Product | None:
+    async def update(self, data: ProductUpdate) -> Product | None:
         update_data = data.model_dump(exclude_unset=True)
         if update_data:
-            await self.session.execute(update(Product).where(Product.id == id).values(**update_data))
+            await self.session.execute(update(Product).where(Product.id == update_data.get("id")).values(**update_data))
             await self.session.commit()
-        return await self.get(id)
+        return await self.get(update_data.get("id"))
 
     async def delete(self, id: int) -> Product | None:
         item = await self.session.get(Product, id)

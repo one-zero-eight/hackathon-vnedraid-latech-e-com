@@ -49,6 +49,7 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
+    id: int
     name: str | None = None
     price: float | None = None
     discount_price: float | None = None
