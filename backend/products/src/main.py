@@ -45,7 +45,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1")
-    # app.router.route_class = AutoDeriveResponsesAPIRoute
+    app.router.route_class = AutoDeriveResponsesAPIRoute
 
     patch_fastapi(app)
 
@@ -74,7 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(item_in_router)
     app.include_router(item_out_router)
 
-    # app.openapi_schema = get_openapi_schema(app)
+    app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
     setup_dishka(container, app)
     app.exception_handler(RequestValidationError)(validation_exception_handler)

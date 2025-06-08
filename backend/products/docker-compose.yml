@@ -3,11 +3,11 @@ services:
     build: 
       dockerfile: ./Dockerfile
     container_name: e-com_product_api
-    command: sh -c "uvicorn src.main:app --reload --port=8000 --host=0.0.0.0"
+    command: sh -c "uvicorn src.main:app --reload --port=8001 --host=0.0.0.0"
     env_file:
       - .env
     ports:
-      - '8001:8000'
+      - '8001:8001'
     depends_on:
       database:
        condition: service_healthy
