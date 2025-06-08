@@ -34,12 +34,15 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/total_with_percent/30`, {
-          method: 'GET',
-          headers: {
-            "X-User-Id": user.id
-          },
-        })
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/total_with_percent/30`,
+          {
+            method: 'GET',
+            headers: {
+              'X-User-Id': user.id
+            }
+          }
+        )
 
         if (!response.ok) {
           console.error(`Failed to fetch total_with_percent: ${response.status}`)
@@ -49,7 +52,7 @@ export default function Dashboard() {
         const data = await response.json()
 
         if (data) {
-          const total = data.current - data.previous;
+          const total = data.current - data.previous
           setTotalAmount(total)
           setTotalTrend(Math.abs(data.ratio))
           setTotalTrendDirection(data.ratio >= 0 ? 'up' : 'down')
@@ -58,14 +61,16 @@ export default function Dashboard() {
         console.error('Error fetching total_with_percent:', error)
       }
 
-
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/average_with_percent/30`, {
-          method: 'GET',
-          headers: {
-            "X-User-Id": user.id
-          },
-        })
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/average_with_percent/30`,
+          {
+            method: 'GET',
+            headers: {
+              'X-User-Id': user.id
+            }
+          }
+        )
 
         if (!response.ok) {
           console.error(`Failed to fetch average_with_percent: ${response.status}`)
@@ -75,7 +80,7 @@ export default function Dashboard() {
         const data = await response.json()
 
         if (data) {
-          const total = data.current - data.previous;
+          const total = data.current - data.previous
           setAverageAmount(total)
           setAverageTrend(Math.abs(data.ratio))
           setAverageTrendDirection(data.ratio >= 0 ? 'up' : 'down')
@@ -85,12 +90,15 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/count_with_percent/30`, {
-          method: 'GET',
-          headers: {
-            "X-User-Id": user.id
-          },
-        })
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_BASE_URLP}/count_with_percent/30`,
+          {
+            method: 'GET',
+            headers: {
+              'X-User-Id': user.id
+            }
+          }
+        )
 
         if (!response.ok) {
           console.error(`Failed to fetch count_with_percent: ${response.status}`)
@@ -100,7 +108,7 @@ export default function Dashboard() {
         const data = await response.json()
 
         if (data) {
-          const total = data.current - data.previous;
+          const total = data.current - data.previous
           setCount(total)
           setCountTrend(Math.abs(data.ratio))
           setCountTrendDirection(data.ratio >= 0 ? 'up' : 'down')
@@ -119,7 +127,7 @@ export default function Dashboard() {
       title: 'Заказали на сумму',
       bottomLeftValue: totalAmount !== null ? totalAmount : 0,
       trend: totalTrendDirection,
-      trendValue: totalTrend !== null ? totalTrend : 0,
+      trendValue: totalTrend !== null ? totalTrend : 0
     },
     {
       icon: ReceiptText,
@@ -140,10 +148,7 @@ export default function Dashboard() {
   return (
     <main className="flex justify-center gap-6">
       {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
-        <div
-          key={idx}
-          className="flex-grow basis-0"
-        >
+        <div key={idx} className="flex-grow basis-0">
           <StatisticsCard
             icon={icon}
             title={title}
