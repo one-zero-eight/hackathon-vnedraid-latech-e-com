@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from starlette import status
 
-from schemas import ProductRead
+from src.schemas import ProductRead
 from src.db.repositories import RepositoryManager, get_repository_manager
 from src.schemas import BrandCreate, BrandRead, BrandUpdate
 
