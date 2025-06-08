@@ -12,8 +12,8 @@ class SellerIdProvider(Provider):
     async def get_user_id(self, request: Request) -> SellerIdScheme:
         seller_id = request.headers.get("X-User-Id")
         if seller_id and seller_id.isnumeric():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="invalid X-User-Id",
-            )
-        return SellerIdScheme(seller_id=int(seller_id))
+            return SellerIdScheme(seller_id=int(seller_id))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid X-User-Id",
+        )
