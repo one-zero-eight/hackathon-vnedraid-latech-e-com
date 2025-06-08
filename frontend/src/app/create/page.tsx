@@ -1,8 +1,6 @@
 'use client'
-import { ProductStatus } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-
 export default function CreateProductPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)

@@ -1,4 +1,10 @@
-import { AuthFormField, BrandRead, CategoryRead, Order } from './types'
+import { AuthFormField, BrandRead, CategoryRead, Order, Product } from './types'
+
+export enum ProductStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DRAFT = 'draft'
+}
 
 export const formFields = {
   user: [
@@ -85,7 +91,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[1]
   },
   {
-    id: '10',
+    id: 10,
     img_url: 'https://via.placeholder.com/150',
     name: 'Кепка бейсболка',
     price: 999,
@@ -101,7 +107,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[5]
   },
   {
-    id: '11',
+    id: 11,
     img_url: 'https://via.placeholder.com/150',
     name: 'Носки спортивные',
     price: 499,
@@ -117,7 +123,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[6]
   },
   {
-    id: '12',
+    id: 12,
     img_url: 'https://via.placeholder.com/150',
     name: 'Ремень кожаный',
     price: 1299,
@@ -133,7 +139,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[7]
   },
   {
-    id: '13',
+    id: 13,
     img_url: 'https://via.placeholder.com/150',
     name: 'Пальто демисезонное',
     price: 6999,
@@ -149,7 +155,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[3]
   },
   {
-    id: '14',
+    id: 14,
     img_url: 'https://via.placeholder.com/150',
     name: 'Футболка поло',
     price: 2499,
@@ -165,7 +171,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[0]
   },
   {
-    id: '15',
+    id: 15,
     img_url: 'https://via.placeholder.com/150',
     name: 'Сумка городская',
     price: 4599,
@@ -181,7 +187,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[8]
   },
   {
-    id: '16',
+    id: 16,
     img_url: 'https://via.placeholder.com/150',
     name: 'Шарф шерстяной',
     price: 1299,
@@ -197,7 +203,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[9]
   },
   {
-    id: '17',
+    id: 17,
     img_url: 'https://via.placeholder.com/150',
     name: 'Леггинсы спортивные',
     price: 1799,
@@ -213,7 +219,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[1]
   },
   {
-    id: '18',
+    id: 18,
     img_url: 'https://via.placeholder.com/150',
     name: 'Толстовка с капюшоном',
     price: 4299,
@@ -229,7 +235,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[0]
   },
   {
-    id: '19',
+    id: 19,
     img_url: 'https://via.placeholder.com/150',
     name: 'Костюм спортивный',
     price: 5999,
@@ -245,7 +251,7 @@ export const sampleProducts: Product[] = [
     category: sampleCategories[2]
   },
   {
-    id: '20',
+    id: 20,
     img_url: 'https://via.placeholder.com/150',
     name: 'Юбка карандаш',
     price: 3299,
