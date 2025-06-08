@@ -13,6 +13,7 @@ from src.presentation.dependencies import create_async_container
 from src.presentation.routes.users import user_router
 
 from fastapi.middleware.cors import CORSMiddleware
+from src.config import settings
 
 
 def get_openapi_schema(app: FastAPI) -> Dict[str, Any]:
@@ -68,13 +69,12 @@ def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1")
     app.add_middleware(
         CORSMiddleware,
-        allow_origin_regex=".*",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        allow_origins=settings.ALLOWED_ORIGINS.split(','),
     )
     app.include_router(user_router)
-    
     app.openapi_schema = get_openapi_schema(app)
     container = create_async_container()
     setup_dishka(container, app)
