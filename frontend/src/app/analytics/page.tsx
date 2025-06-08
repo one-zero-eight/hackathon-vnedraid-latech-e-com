@@ -1,35 +1,8 @@
+'use client'
 import StatisticsCard from '@/components/ui/statisticsCard'
 import { getAccessToken, getUserIdFromToken } from '@/lib/auth'
 import { ReceiptText, ShoppingCart, Wallet } from 'lucide-react'
 import { useEffect, useState } from 'react'
-
-const [totalAmount, setTotalAmount] = useState<number | null>(null)
-const [totalTrend, setTotalTrend] = useState<number | null>(null)
-const [totalTrendDirection, setTotalTrendDirection] = useState<'up' | 'down'>('up')
-
-const stats = [
-  {
-    icon: Wallet,
-    title: 'Заказали на сумму',
-    bottomLeftValue: totalAmount !== null ? totalAmount : 0,
-    trend: totalTrendDirection,
-    trendValue: totalTrend !== null ? totalTrend : 0
-  },
-  {
-    icon: ReceiptText,
-    title: 'Средний чек',
-    bottomLeftValue: 842,
-    trend: 'down' as const,
-    trendValue: 3.2
-  },
-  {
-    icon: ShoppingCart,
-    title: 'Количество заказанных товаров',
-    bottomLeftValue: 3500,
-    trend: 'up' as const,
-    trendValue: 8.1
-  }
-]
 
 export default function Dashboard() {
   useEffect(() => {
@@ -76,6 +49,34 @@ export default function Dashboard() {
 
     fetchData()
   }, [])
+
+  const [totalAmount, setTotalAmount] = useState<number | null>(null)
+  const [totalTrend, setTotalTrend] = useState<number | null>(null)
+  const [totalTrendDirection, setTotalTrendDirection] = useState<'up' | 'down'>('up')
+
+  const stats = [
+    {
+      icon: Wallet,
+      title: 'Заказали на сумму',
+      bottomLeftValue: totalAmount !== null ? totalAmount : 0,
+      trend: totalTrendDirection,
+      trendValue: totalTrend !== null ? totalTrend : 0
+    },
+    {
+      icon: ReceiptText,
+      title: 'Средний чек',
+      bottomLeftValue: 842,
+      trend: 'down' as const,
+      trendValue: 3.2
+    },
+    {
+      icon: ShoppingCart,
+      title: 'Количество заказанных товаров',
+      bottomLeftValue: 3500,
+      trend: 'up' as const,
+      trendValue: 8.1
+    }
+  ]
   return (
     <main className="flex justify-center gap-6">
       {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
