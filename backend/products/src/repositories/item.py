@@ -83,12 +83,12 @@ class ItemRepository:
         )
 
         current_result = await self.session.execute(current_stmt)
-        current_result = current_result.first()
+        current_result = current_result.first()[0]
         previous_result = await self.session.execute(previous_stmt)
-        previous_result = previous_result.first()
+        previous_result = previous_result.first()[0]
         return (
             previous_result if previous_result else 0,
-            previous_result if previous_result else 0,
+            current_result if current_result else 0,
         )
 
     async def get_total_bought_products_for_current_and_previos_number_of_days(
