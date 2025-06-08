@@ -1,4 +1,4 @@
-from dishka.integrations.fastapi import FromDishka
+from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.repositories.brand import BrandRepository
@@ -7,7 +7,7 @@ from src.db.repositories.comment import CommentRepository
 from src.db.repositories.item import ItemInRepository, ItemOutRepository
 from src.db.repositories.order import OrderRepository
 from src.db.repositories.product import ProductRepository
-
+from src.dependencies.db import get_session
 
 class RepositoryManager:
     def __init__(self, session: AsyncSession):
@@ -27,5 +27,7 @@ class RepositoryManager:
         await self.session.rollback()
 
 
-async def get_repository_manager(session: AsyncSession = FromDishka[AsyncSession]) -> RepositoryManager:
+async def get_repository_manager(
+    session: AsyncSession = Depends(get_session)
+) -> RepositoryManager:
     return RepositoryManager(session)

@@ -1,9 +1,8 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from schemas import CategoryUpdate
 from src.db.models import Category
-from src.schemas import CategoryCreate
+from src.schemas import CategoryCreate, CategoryUpdate
 
 
 class CategoryRepository:
@@ -18,8 +17,10 @@ class CategoryRepository:
         result = await self.session.execute(select(Category).where(Category.name == name))
         return result.scalar_one_or_none()
 
-    async def get_all(self) -> list[Category]:
-        result = await self.session.execute(select(Category))
+    async def get_all(self, skip: int = 0, limit: int = 100) -> list[Category]:
+        result = await self.session.execute(
+            select(Category).offset(skip).limit(limit)
+        )
         return result.scalars().all()
 
     async def create(self, data: CategoryCreate) -> Category:
