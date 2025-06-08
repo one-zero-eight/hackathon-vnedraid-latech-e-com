@@ -12,11 +12,11 @@ class BrandRepository:
 
     async def get_by_id(self, id: int) -> Brand | None:
         result = await self.session.execute(select(Brand).where(Brand.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Brand]:
         result = await self.session.execute(select(Brand).offset(skip).limit(limit))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: BrandCreate) -> Brand:
         obj = Brand(**data.model_dump())
@@ -43,8 +43,8 @@ class BrandRepository:
 
     async def get_by_name(self, name: str) -> Brand | None:
         result = await self.session.execute(select(Brand).where(Brand.name == name))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_with_products(self, id: int) -> Brand | None:
         result = await self.session.execute(select(Brand).options(joinedload(Brand.products)).where(Brand.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()

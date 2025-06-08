@@ -35,14 +35,23 @@ async def get_brand_by_name(
     return brand
 
 
-@brand_router.get("/{brand_id}/with-products", response_model=ProductRead)
-async def get_brand_with_products(
-    brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)
-) -> BrandRead:
-    brand = await repo_manager.brand.get_with_products(brand_id)
-    if not brand:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
-    return brand
+# @brand_router.get("/{brand_id}/with-products", response_model=ProductRead)
+# async def get_brand_with_products(
+#     brand_id: int, repo_manager: RepositoryManager = Depends(get_repository_manager)
+# ) -> BrandRead:
+#     brand = await repo_manager.brand.get_with_products(brand_id)
+#     print('-----')
+#     print('-----')
+#     print('-----')
+
+#     print(brand)
+#     print('-----')
+#     print('-----')
+#     print('-----')
+
+#     if not brand:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Brand not found")
+#     return brand
 
 
 @brand_router.post("/", response_model=BrandRead, status_code=status.HTTP_201_CREATED)

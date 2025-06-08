@@ -11,11 +11,11 @@ class CommentRepository:
 
     async def get_by_id(self, id: int) -> Comment | None:
         result = await self.session.execute(select(Comment).where(Comment.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self) -> list[Comment]:
         result = await self.session.execute(select(Comment))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: CommentCreate) -> Comment:
         obj = Comment(**data.model_dump())

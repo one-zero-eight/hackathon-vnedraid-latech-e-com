@@ -11,11 +11,11 @@ class OrderRepository:
 
     async def get_by_id(self, id: int) -> Order | None:
         result = await self.session.execute(select(Order).where(Order.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self) -> list[Order]:
         result = await self.session.execute(select(Order))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: OrderCreate) -> Order:
         obj = Order(**data.model_dump())

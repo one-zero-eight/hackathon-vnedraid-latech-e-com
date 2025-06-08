@@ -12,11 +12,11 @@ class ProductRepository:
 
     async def get(self, id: int) -> Product | None:
         result = await self.session.execute(select(Product).where(Product.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self, skip: int = 0, limit: int = 100) -> list[Product]:
         result = await self.session.execute(select(Product).offset(skip).limit(limit))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: ProductCreate) -> Product:
         obj = Product(**data.model_dump(exclude_unset=True))
@@ -53,19 +53,19 @@ class ProductRepository:
             )
             .where(Product.id == id)
         )
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_by_status(self, status: ProductStatus) -> list[Product]:
         result = await self.session.execute(select(Product).where(Product.status == status))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def get_by_brand(self, brand_id: int) -> list[Product]:
         result = await self.session.execute(select(Product).where(Product.brand_id == brand_id))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def get_by_category(self, category_id: int) -> list[Product]:
         result = await self.session.execute(select(Product).where(Product.category_id == category_id))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def search(
         self,
@@ -92,7 +92,7 @@ class ProductRepository:
         if status is not None:
             query = query.where(Product.status == status)
         result = await self.session.execute(query.offset(skip).limit(limit))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def update_stock(self, product_id: int, count: int) -> Product | None:
         await self.session.execute(update(Product).where(Product.id == product_id).values(count=count))

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Category(Base, IdMixin):
     __tablename__ = "category"
 
-    name: Mapped[str] = mapped_column(String(50))
+    name: Mapped[str] = mapped_column(String(50), unique=True)
 
     products: Mapped[list["Product"]] = relationship(
         "Product",

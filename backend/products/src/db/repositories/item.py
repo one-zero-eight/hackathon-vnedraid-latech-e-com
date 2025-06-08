@@ -11,11 +11,11 @@ class ItemInRepository:
 
     async def get_by_id(self, id: int) -> ItemIn | None:
         result = await self.session.execute(select(ItemIn).where(ItemIn.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self) -> list[ItemIn]:
         result = await self.session.execute(select(ItemIn))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: ItemInCreate) -> ItemIn:
         obj = ItemIn(**data.model_dump())
@@ -48,11 +48,11 @@ class ItemOutRepository:
 
     async def get_by_id(self, id: int) -> ItemOut | None:
         result = await self.session.execute(select(ItemOut).where(ItemOut.id == id))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_all(self) -> list[ItemOut]:
         result = await self.session.execute(select(ItemOut))
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def create(self, data: ItemOutCreate) -> ItemOut:
         obj = ItemOut(**data.model_dump())
