@@ -87,7 +87,6 @@ export default function PieChart({ userId }: PieChartProps) {
         return `translate(${x},${y})`
       })
       .style('text-anchor', 'middle')
-      .style('font-size', '12px')
   }, [data])
 
   // UI
@@ -96,7 +95,7 @@ export default function PieChart({ userId }: PieChartProps) {
 
   return (
     <Card className="flex w-full items-center justify-center">
-      <svg ref={ref} className="geist-mono h-auto max-h-[300px] w-full max-w-[300px]" />
+      <svg ref={ref} className="geist-mono h-auto max-h-[300px] w-full max-w-[300px] text-sm" />
     </Card>
   )
 }
