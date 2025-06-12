@@ -85,6 +85,12 @@ cd hackathon-vnedraid-latech-e-com
       docker compose up
       ```
     - проделайте те же действия для /backend/users
+    - для добавления кортежей в базу данных products используйте SQL-запросы внутри контейнера
+    ```bash
+      docker exec -it e-com_product_postgres /bin/sh
+      psql -U postgres
+      # sql request
+    ```
 
 
 - **Frontend**
