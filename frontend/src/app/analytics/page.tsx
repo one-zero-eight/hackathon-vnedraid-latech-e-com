@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ShoppingCart, Wallet, ReceiptText } from 'lucide-react'
 import StatisticsCard from '@/components/ui/statisticsCard'
+import PieChart from '@/components/charts/pieChart'
 import { getAccessToken } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { getMe } from '@/lib/hooks/useAuth'
@@ -146,18 +147,26 @@ export default function Dashboard() {
   ]
 
   return (
-    <main className="flex justify-center gap-6">
-      {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
-        <div key={idx} className="flex-grow basis-0">
-          <StatisticsCard
-            icon={icon}
-            title={title}
-            bottomLeftValue={bottomLeftValue}
-            trend={trend}
-            trendValue={trendValue}
-          />
-        </div>
-      ))}
+    <main className="flex flex-col gap-6">
+      {/* Первый блок — карточки */}
+      <div className="flex flex-col justify-center gap-6 md:flex-row">
+        {stats.map(({ icon, title, bottomLeftValue, trend, trendValue }, idx) => (
+          <div key={idx} className="flex-grow basis-0">
+            <StatisticsCard
+              icon={icon}
+              title={title}
+              bottomLeftValue={bottomLeftValue}
+              trend={trend}
+              trendValue={trendValue}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Второй блок — PieChart на новой строке */}
+      <div className="flex justify-center">
+        <PieChart userId={user?.id ?? ''} />
+      </div>
     </main>
   )
 }
