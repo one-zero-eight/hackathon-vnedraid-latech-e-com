@@ -19,7 +19,7 @@ class User(Base):
         default=lambda: datetime.datetime.now(datetime.timezone.utc)
         - datetime.timedelta(minutes=10),
     )
-    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     inn: Mapped[str] = mapped_column(String(12), unique=True)
     card_number: Mapped[str] = mapped_column(String(20))
     bank_code: Mapped[str] = mapped_column(String(9))
